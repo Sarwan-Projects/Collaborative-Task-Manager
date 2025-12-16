@@ -10,8 +10,8 @@ A modern, full-stack task management application with real-time collaboration fe
 
 ## 🚀 Live Demo
 
-- **Frontend**: [https://taskflow-collab.vercel.app](https://taskflow-collab.vercel.app)
-- **Backend API**: [https://taskflow-api.onrender.com](https://taskflow-api.onrender.com)
+- **Frontend**: [https://collaborative-task-manager-indol.vercel.app](https://collaborative-task-manager-indol.vercel.app)
+- **Backend API**: [https://taskflow-api-441h.onrender.com](https://taskflow-api-441h.onrender.com)
 
 ---
 
@@ -422,7 +422,8 @@ docker-compose down
 
 ### Base URL
 ```
-http://localhost:5000/api/v1
+Production: https://taskflow-api-441h.onrender.com/api/v1
+Local: http://localhost:5000/api/v1
 ```
 
 ### Authentication Endpoints
