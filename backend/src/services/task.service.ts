@@ -88,6 +88,15 @@ export class TaskService {
         previousValue: existingTask.status,
         newValue: data.status
       });
+
+      // If task is completed, notify the creator
+      if (data.status === 'Completed' && existingTask.creatorId.toString() !== userId) {
+        await notificationRepository.create({
+          userId: existingTask.creatorId.toString(),
+          message: `Task "${existingTask.title}" has been completed`,
+          taskId
+        });
+      }
     }
 
     // Check for priority change
@@ -158,6 +167,9 @@ export class TaskService {
     }
 
     await taskRepository.delete(taskId);
+
+    // Delete associated notifications
+    await notificationRepository.deleteByTask(taskId);
 
     await auditLogRepository.create({
       taskId,

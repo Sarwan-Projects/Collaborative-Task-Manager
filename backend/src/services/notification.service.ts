@@ -38,6 +38,13 @@ export class NotificationService {
   }
 
   /**
+   * Delete a notification
+   */
+  async deleteNotification(notificationId: string, userId: string): Promise<void> {
+    await notificationRepository.delete(notificationId, userId);
+  }
+
+  /**
    * Create a notification (used by other services)
    */
   async createNotification(data: {

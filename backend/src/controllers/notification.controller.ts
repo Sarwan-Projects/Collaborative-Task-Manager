@@ -76,6 +76,27 @@ export class NotificationController {
       next(error);
     }
   }
+
+  /**
+   * DELETE /api/v1/notifications/:id
+   * Delete a notification
+   */
+  async deleteNotification(
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      await notificationService.deleteNotification(req.params.id, req.user!.id);
+
+      res.status(200).json({
+        success: true,
+        message: 'Notification deleted'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export const notificationController = new NotificationController();

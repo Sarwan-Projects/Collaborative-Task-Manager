@@ -24,7 +24,7 @@ export default function Layout() {
                 Terms
               </a>
               <a 
-                href="https://github.com" 
+                href="https://github.com/Sarwan-Projects/Collaborative-Task-Manager" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-sm text-gray-500 hover:text-indigo-600 transition-colors"

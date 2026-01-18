@@ -14,7 +14,13 @@ export default function TaskCard({ task, onEdit, onDelete, currentUserId }: Task
   const creator = task.creatorId as User;
   const assignee = task.assignedToId as User | null;
   const isOverdue = isPast(new Date(task.dueDate)) && task.status !== Status.COMPLETED;
-  const isCreator = creator?.id === currentUserId || (creator as any)?._id === currentUserId;
+  
+  // Handle both id and _id fields from backend
+  const creatorId = typeof task.creatorId === 'string' 
+    ? task.creatorId 
+    : (creator?.id || (creator as any)?._id?.toString() || (creator as any)?._id);
+  const isCreator = creatorId === currentUserId;
+  
   const dueDate = new Date(task.dueDate);
 
   return (
@@ -24,13 +30,15 @@ export default function TaskCard({ task, onEdit, onDelete, currentUserId }: Task
           {task.title}
         </h3>
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={() => onEdit(task)}
-            className="p-2 text-gray-400 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-all"
-            title="Edit task"
-          >
-            <Edit className="w-4 h-4" />
-          </button>
+          {task.status !== Status.COMPLETED && (
+            <button
+              onClick={() => onEdit(task)}
+              className="p-2 text-gray-400 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-all"
+              title="Edit task"
+            >
+              <Edit className="w-4 h-4" />
+            </button>
+          )}
           {isCreator && (
             <button
               onClick={() => onDelete(task._id)}
@@ -48,6 +56,11 @@ export default function TaskCard({ task, onEdit, onDelete, currentUserId }: Task
       <div className="flex flex-wrap gap-2 mb-4">
         <Badge variant="status" value={task.status} />
         <Badge variant="priority" value={task.priority} />
+        {task.status === Status.COMPLETED && (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm">
+            ✓ Completed
+          </span>
+        )}
       </div>
 
       <div className="flex flex-col gap-2 text-sm">

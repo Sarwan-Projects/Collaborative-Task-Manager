@@ -50,6 +50,20 @@ export class NotificationRepository {
   async markAllAsRead(userId: string): Promise<void> {
     await Notification.updateMany({ userId, read: false }, { read: true });
   }
+
+  /**
+   * Delete all notifications for a task
+   */
+  async deleteByTask(taskId: string): Promise<void> {
+    await Notification.deleteMany({ taskId });
+  }
+
+  /**
+   * Delete a single notification
+   */
+  async delete(id: string, userId: string): Promise<void> {
+    await Notification.findOneAndDelete({ _id: id, userId });
+  }
 }
 
 export const notificationRepository = new NotificationRepository();

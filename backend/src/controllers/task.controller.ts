@@ -16,12 +16,27 @@ export class TaskController {
     try {
       const task = await taskService.createTask(req.body, req.user!.id);
 
+      // Transform task to ensure consistent ID format
+      const transformedTask = {
+        ...task.toObject(),
+        creatorId: task.creatorId ? {
+          id: (task.creatorId as any)._id.toString(),
+          name: (task.creatorId as any).name,
+          email: (task.creatorId as any).email
+        } : task.creatorId,
+        assignedToId: task.assignedToId ? {
+          id: (task.assignedToId as any)._id.toString(),
+          name: (task.assignedToId as any).name,
+          email: (task.assignedToId as any).email
+        } : task.assignedToId
+      };
+
       // Emit real-time event
-      getIO().emit('task:created', task);
+      getIO().emit('task:created', transformedTask);
 
       res.status(201).json({
         success: true,
-        data: task,
+        data: transformedTask,
         message: 'Task created successfully'
       });
     } catch (error) {
@@ -37,10 +52,25 @@ export class TaskController {
     try {
       const tasks = await taskService.getTasks(req.query as any, req.user!.id);
 
+      // Transform tasks to ensure consistent ID format
+      const transformedTasks = tasks.map(task => ({
+        ...task.toObject(),
+        creatorId: task.creatorId ? {
+          id: (task.creatorId as any)._id.toString(),
+          name: (task.creatorId as any).name,
+          email: (task.creatorId as any).email
+        } : task.creatorId,
+        assignedToId: task.assignedToId ? {
+          id: (task.assignedToId as any)._id.toString(),
+          name: (task.assignedToId as any).name,
+          email: (task.assignedToId as any).email
+        } : task.assignedToId
+      }));
+
       res.status(200).json({
         success: true,
-        data: tasks,
-        count: tasks.length
+        data: transformedTasks,
+        count: transformedTasks.length
       });
     } catch (error) {
       next(error);
@@ -55,9 +85,24 @@ export class TaskController {
     try {
       const task = await taskService.getTask(req.params.id);
 
+      // Transform task to ensure consistent ID format
+      const transformedTask = {
+        ...task.toObject(),
+        creatorId: task.creatorId ? {
+          id: (task.creatorId as any)._id.toString(),
+          name: (task.creatorId as any).name,
+          email: (task.creatorId as any).email
+        } : task.creatorId,
+        assignedToId: task.assignedToId ? {
+          id: (task.assignedToId as any)._id.toString(),
+          name: (task.assignedToId as any).name,
+          email: (task.assignedToId as any).email
+        } : task.assignedToId
+      };
+
       res.status(200).json({
         success: true,
-        data: task
+        data: transformedTask
       });
     } catch (error) {
       next(error);
@@ -76,8 +121,23 @@ export class TaskController {
         req.user!.id
       );
 
+      // Transform task to ensure consistent ID format
+      const transformedTask = {
+        ...task.toObject(),
+        creatorId: task.creatorId ? {
+          id: (task.creatorId as any)._id.toString(),
+          name: (task.creatorId as any).name,
+          email: (task.creatorId as any).email
+        } : task.creatorId,
+        assignedToId: task.assignedToId ? {
+          id: (task.assignedToId as any)._id.toString(),
+          name: (task.assignedToId as any).name,
+          email: (task.assignedToId as any).email
+        } : task.assignedToId
+      };
+
       // Emit real-time event with change details
-      getIO().emit('task:updated', { task, changes });
+      getIO().emit('task:updated', { task: transformedTask, changes });
 
       // If assignee changed, emit specific notification event
       if (changes.includes('assignee') && task.assignedToId) {
@@ -89,7 +149,7 @@ export class TaskController {
 
       res.status(200).json({
         success: true,
-        data: task,
+        data: transformedTask,
         message: 'Task updated successfully'
       });
     } catch (error) {
@@ -125,9 +185,28 @@ export class TaskController {
     try {
       const data = await taskService.getDashboardData(req.user!.id);
 
+      // Transform tasks to ensure consistent ID format
+      const transformTask = (task: any) => ({
+        ...task.toObject(),
+        creatorId: task.creatorId ? {
+          id: task.creatorId._id.toString(),
+          name: task.creatorId.name,
+          email: task.creatorId.email
+        } : task.creatorId,
+        assignedToId: task.assignedToId ? {
+          id: task.assignedToId._id.toString(),
+          name: task.assignedToId.name,
+          email: task.assignedToId.email
+        } : task.assignedToId
+      });
+
       res.status(200).json({
         success: true,
-        data
+        data: {
+          assignedToMe: data.assignedToMe.map(transformTask),
+          createdByMe: data.createdByMe.map(transformTask),
+          overdue: data.overdue.map(transformTask)
+        }
       });
     } catch (error) {
       next(error);

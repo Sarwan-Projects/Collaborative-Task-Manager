@@ -34,4 +34,13 @@ router.put('/:id/read', (req, res, next) =>
   notificationController.markAsRead(req, res, next)
 );
 
+/**
+ * @route DELETE /api/v1/notifications/:id
+ * @desc Delete a notification
+ * @access Private
+ */
+router.delete('/:id', (req, res, next) =>
+  notificationController.deleteNotification(req, res, next)
+);
+
 export default router;
