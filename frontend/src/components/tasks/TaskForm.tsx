@@ -36,8 +36,12 @@ export default function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFo
 
   const priorityOptions = Object.values(Priority).map((p) => ({ value: p, label: p }));
   const statusOptions = Object.values(Status).map((s) => ({ value: s, label: s }));
+  
+  // Build user options - include "Unassigned" only for new tasks or when creator is editing
+  const assignedUserId = (task?.assignedToId as any)?._id || (task?.assignedToId as any)?.id || (task?.assignedToId as string) || '';
   const userOptions = [
-    { value: '', label: 'Unassigned' },
+    // Only show "Unassigned" option if no task exists or if creator is editing
+    ...(!task || isCreator ? [{ value: '', label: 'Unassigned' }] : []),
     ...users.map((u) => ({ value: u.id, label: u.name }))
   ];
 
