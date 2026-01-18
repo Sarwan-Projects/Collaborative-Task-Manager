@@ -41,6 +41,29 @@ export interface Notification {
   createdAt: string;
 }
 
+export interface TaskInvitation {
+  _id: string;
+  taskId: {
+    _id: string;
+    title: string;
+    description: string;
+    dueDate: string;
+    priority: Priority;
+  };
+  fromUserId: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  toUserId: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: string;
+}
+
 export interface AuditLog {
   _id: string;
   taskId: string;

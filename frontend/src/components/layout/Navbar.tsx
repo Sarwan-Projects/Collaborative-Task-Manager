@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Bell, User, LogOut, LayoutDashboard, ListTodo, Zap, Trash2 } from 'lucide-react';
+import { Menu, X, Bell, User, LogOut, LayoutDashboard, ListTodo, Zap, Trash2, Inbox } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import { useNotifications, useMarkAllAsRead, useDeleteNotification } from '../../hooks/useNotifications';
+import { useInvitations } from '../../hooks/useInvitations';
 import Button from '../ui/Button';
 
 export default function Navbar() {
@@ -15,8 +16,11 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { data: notifData } = useNotifications();
+  const { data: invitations = [] } = useInvitations();
   const markAllAsRead = useMarkAllAsRead();
   const deleteNotification = useDeleteNotification();
+
+  const totalNotifications = (notifData?.unreadCount || 0) + invitations.length;
 
   // Close notification dropdown when clicking outside
   useEffect(() => {
@@ -93,11 +97,11 @@ export default function Navbar() {
                 className="relative p-2.5 text-gray-500 hover:text-gray-700 rounded-xl hover:bg-gray-100 transition-all"
               >
                 <Bell className="w-5 h-5" />
-                {notifData?.unreadCount ? (
+                {totalNotifications > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-gradient-to-r from-red-500 to-rose-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg">
-                    {notifData.unreadCount > 9 ? '9+' : notifData.unreadCount}
+                    {totalNotifications > 9 ? '9+' : totalNotifications}
                   </span>
-                ) : null}
+                )}
               </button>
 
               {isNotifOpen && (
@@ -113,6 +117,42 @@ export default function Navbar() {
                       </button>
                     ) : null}
                   </div>
+
+                  {/* Invitations Section */}
+                  {invitations.length > 0 && (
+                    <div className="border-b border-gray-100">
+                      <div className="px-4 py-2 bg-indigo-50">
+                        <div className="flex items-center gap-2">
+                          <Inbox className="w-4 h-4 text-indigo-600" />
+                          <span className="text-sm font-semibold text-indigo-900">
+                            Task Invitations ({invitations.length})
+                          </span>
+                        </div>
+                      </div>
+                      {invitations.slice(0, 3).map((inv) => (
+                        <Link
+                          key={inv._id}
+                          to="/dashboard"
+                          onClick={() => setIsNotifOpen(false)}
+                          className="block px-4 py-3 hover:bg-indigo-50 transition-colors border-l-2 border-indigo-500"
+                        >
+                          <p className="text-sm text-gray-800 font-medium">{inv.taskId.title}</p>
+                          <p className="text-xs text-gray-500 mt-1">From: {inv.fromUserId.name}</p>
+                        </Link>
+                      ))}
+                      {invitations.length > 3 && (
+                        <Link
+                          to="/dashboard"
+                          onClick={() => setIsNotifOpen(false)}
+                          className="block px-4 py-2 text-center text-sm text-indigo-600 hover:bg-indigo-50"
+                        >
+                          View all {invitations.length} invitations
+                        </Link>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Regular Notifications */}
                   {notifData?.notifications?.length ? (
                     notifData.notifications.slice(0, 10).map((notif) => (
                       <div
@@ -134,12 +174,12 @@ export default function Navbar() {
                         </button>
                       </div>
                     ))
-                  ) : (
+                  ) : invitations.length === 0 ? (
                     <div className="px-4 py-8 text-center">
                       <Bell className="w-8 h-8 text-gray-300 mx-auto mb-2" />
                       <p className="text-sm text-gray-500">No notifications yet</p>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               )}
             </div>

@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { ClipboardList, Clock, AlertTriangle, Plus, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { ClipboardList, Clock, AlertTriangle, Plus, TrendingUp, CheckCircle2, Inbox } from 'lucide-react';
 import { useDashboard, useCreateTask, useUpdateTask, useDeleteTask } from '../hooks/useTasks';
+import { useInvitations, useAcceptInvitation, useRejectInvitation } from '../hooks/useInvitations';
 import { useAuth } from '../context/AuthContext';
 import { Task, Status } from '../types';
 import { TaskInput } from '../lib/validations';
 import TaskCard from '../components/tasks/TaskCard';
 import TaskForm from '../components/tasks/TaskForm';
+import InvitationCard from '../components/invitations/InvitationCard';
 import Modal from '../components/ui/Modal';
 import Button from '../components/ui/Button';
 import { DashboardSkeleton } from '../components/ui/Skeleton';
@@ -15,9 +17,12 @@ export default function Dashboard() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const { user } = useAuth();
   const { data, isLoading } = useDashboard();
+  const { data: invitations = [] } = useInvitations();
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
+  const acceptInvitation = useAcceptInvitation();
+  const rejectInvitation = useRejectInvitation();
 
   const handleSubmit = (formData: TaskInput) => {
     if (editingTask) {
@@ -129,6 +134,30 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Pending Invitations */}
+      {invitations.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Inbox className="w-5 h-5 text-indigo-600" />
+            <h2 className="text-xl font-bold text-gray-900">Pending Invitations</h2>
+            <span className="px-2 py-1 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-full">
+              {invitations.length}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {invitations.map((invitation) => (
+              <InvitationCard
+                key={invitation._id}
+                invitation={invitation}
+                onAccept={(id) => acceptInvitation.mutate(id)}
+                onReject={(id) => rejectInvitation.mutate(id)}
+                isLoading={acceptInvitation.isPending || rejectInvitation.isPending}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Task sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
