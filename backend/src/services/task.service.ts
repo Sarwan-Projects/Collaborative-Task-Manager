@@ -28,6 +28,26 @@ export class TaskService {
       }
     }
 
+    // If user assigns to themselves, create task with assignment
+    // Otherwise, create task without assignee and send invitation
+    if (data.assignedToId && data.assignedToId === creatorId) {
+      // Self-assignment - no invitation needed
+      const task = await taskRepository.create({ 
+        ...data, 
+        creatorId,
+        assignedToId: data.assignedToId
+      });
+
+      await auditLogRepository.create({
+        taskId: task._id.toString(),
+        userId: creatorId,
+        action: 'CREATED',
+        newValue: task.title
+      });
+
+      return taskRepository.findById(task._id.toString()) as Promise<ITaskDocument>;
+    }
+
     // Create task without assignee initially
     const task = await taskRepository.create({ 
       ...data, 
@@ -35,18 +55,12 @@ export class TaskService {
       assignedToId: undefined // Don't assign yet
     });
     
-    // If assignee provided, create invitation
-    if (data.assignedToId && data.assignedToId !== creatorId) {
+    // If assignee provided (and not self), create invitation (no notification - invitation is enough)
+    if (data.assignedToId) {
       await taskInvitationRepository.create({
         taskId: task._id.toString(),
         fromUserId: creatorId,
         toUserId: data.assignedToId
-      });
-
-      await notificationRepository.create({
-        userId: data.assignedToId,
-        message: `${(await userRepository.findById(creatorId))?.name} wants to assign you a task: "${task.title}". Please accept or reject.`,
-        taskId: task._id.toString()
       });
     }
 
@@ -142,30 +156,34 @@ export class TaskService {
           throw new ApiError('Assigned user not found', 404);
         }
 
-        // Create invitation for new assignee
-        await taskInvitationRepository.create({
-          taskId,
-          fromUserId: userId,
-          toUserId: newAssignee
-        });
+        // If reassigning to self, update directly
+        if (newAssignee === userId) {
+          await auditLogRepository.create({
+            taskId,
+            userId,
+            action: 'ASSIGNEE_CHANGED',
+            previousValue: oldAssignee || 'Unassigned',
+            newValue: 'Self'
+          });
+        } else {
+          // Create invitation for new assignee (no notification - invitation is enough)
+          await taskInvitationRepository.create({
+            taskId,
+            fromUserId: userId,
+            toUserId: newAssignee
+          });
 
-        const creator = await userRepository.findById(userId);
-        await notificationRepository.create({
-          userId: newAssignee,
-          message: `${creator?.name} wants to assign you a task: "${existingTask.title}". Please accept or reject.`,
-          taskId
-        });
+          // Don't update assignedToId yet - wait for acceptance
+          delete data.assignedToId;
 
-        // Don't update assignedToId yet - wait for acceptance
-        delete data.assignedToId;
-
-        await auditLogRepository.create({
-          taskId,
-          userId,
-          action: 'ASSIGNEE_CHANGED',
-          previousValue: oldAssignee || 'Unassigned',
-          newValue: 'Pending acceptance'
-        });
+          await auditLogRepository.create({
+            taskId,
+            userId,
+            action: 'ASSIGNEE_CHANGED',
+            previousValue: oldAssignee || 'Unassigned',
+            newValue: 'Pending acceptance'
+          });
+        }
       }
     }
 

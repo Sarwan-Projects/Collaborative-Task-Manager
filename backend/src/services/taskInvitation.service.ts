@@ -16,7 +16,12 @@ export class TaskInvitationService {
       throw new ApiError('Invitation not found', 404);
     }
 
-    if (invitation.toUserId.toString() !== userId) {
+    // Handle both populated and non-populated toUserId
+    const toUserIdString = typeof invitation.toUserId === 'string'
+      ? invitation.toUserId
+      : invitation.toUserId._id.toString();
+
+    if (toUserIdString !== userId) {
       throw new ApiError('Not authorized to accept this invitation', 403);
     }
 
@@ -27,17 +32,26 @@ export class TaskInvitationService {
     // Update invitation status
     await taskInvitationRepository.updateStatus(invitationId, 'accepted');
 
+    // Get task details for notification
+    const taskIdString = typeof invitation.taskId === 'string'
+      ? invitation.taskId
+      : invitation.taskId._id.toString();
+
     // Assign task to user
-    await taskRepository.update(invitation.taskId.toString(), {
+    await taskRepository.update(taskIdString, {
       assignedToId: userId
     });
 
     // Notify creator
     const user = await userRepository.findById(userId);
+    const fromUserIdString = typeof invitation.fromUserId === 'string'
+      ? invitation.fromUserId
+      : invitation.fromUserId._id.toString();
+
     await notificationRepository.create({
-      userId: invitation.fromUserId.toString(),
+      userId: fromUserIdString,
       message: `${user?.name} accepted the task assignment: "${(invitation.taskId as any).title}"`,
-      taskId: invitation.taskId.toString()
+      taskId: taskIdString
     });
 
     return invitation;
@@ -50,7 +64,12 @@ export class TaskInvitationService {
       throw new ApiError('Invitation not found', 404);
     }
 
-    if (invitation.toUserId.toString() !== userId) {
+    // Handle both populated and non-populated toUserId
+    const toUserIdString = typeof invitation.toUserId === 'string'
+      ? invitation.toUserId
+      : invitation.toUserId._id.toString();
+
+    if (toUserIdString !== userId) {
       throw new ApiError('Not authorized to reject this invitation', 403);
     }
 
@@ -61,12 +80,21 @@ export class TaskInvitationService {
     // Update invitation status
     await taskInvitationRepository.updateStatus(invitationId, 'rejected');
 
+    // Get task details for notification
+    const taskIdString = typeof invitation.taskId === 'string'
+      ? invitation.taskId
+      : invitation.taskId._id.toString();
+
     // Notify creator
     const user = await userRepository.findById(userId);
+    const fromUserIdString = typeof invitation.fromUserId === 'string'
+      ? invitation.fromUserId
+      : invitation.fromUserId._id.toString();
+
     await notificationRepository.create({
-      userId: invitation.fromUserId.toString(),
+      userId: fromUserIdString,
       message: `${user?.name} rejected the task assignment: "${(invitation.taskId as any).title}"`,
-      taskId: invitation.taskId.toString()
+      taskId: taskIdString
     });
 
     return invitation;
