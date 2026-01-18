@@ -30,7 +30,8 @@ export class AuthController {
           user: {
             id: user._id,
             email: user.email,
-            name: user.name
+            name: user.name,
+            createdAt: user.createdAt
           },
           token
         },
@@ -63,7 +64,8 @@ export class AuthController {
           user: {
             id: user._id,
             email: user.email,
-            name: user.name
+            name: user.name,
+            createdAt: user.createdAt
           },
           token
         },

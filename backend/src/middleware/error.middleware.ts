@@ -23,7 +23,8 @@ export const errorHandler = (
   res: Response,
   _next: NextFunction
 ): void => {
-  console.error('Error:', err);
+  // Log error for debugging (but don't expose to client)
+  console.error('Error:', err.name, err.message);
 
   if (err instanceof ApiError) {
     res.status(err.statusCode).json({
@@ -37,8 +38,7 @@ export const errorHandler = (
   if (err.name === 'ValidationError') {
     res.status(400).json({
       success: false,
-      error: 'Validation error',
-      details: err.message
+      error: 'Validation error. Please check your input.'
     });
     return;
   }
@@ -61,7 +61,24 @@ export const errorHandler = (
     return;
   }
 
-  // Default server error
+  // Handle JWT errors
+  if (err.name === 'JsonWebTokenError') {
+    res.status(401).json({
+      success: false,
+      error: 'Invalid authentication token'
+    });
+    return;
+  }
+
+  if (err.name === 'TokenExpiredError') {
+    res.status(401).json({
+      success: false,
+      error: 'Authentication token expired'
+    });
+    return;
+  }
+
+  // Default server error - don't expose internal details
   res.status(500).json({
     success: false,
     error: 'Internal server error'

@@ -7,6 +7,7 @@ import { connectDatabase } from './config/database';
 import { initializeSocket } from './socket';
 import routes from './routes';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
+import { rateLimiter } from './middleware/rateLimit.middleware';
 
 const app = express();
 const httpServer = createServer(app);
@@ -36,12 +37,23 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   exposedHeaders: ['Set-Cookie']
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// Security: Limit request body size to prevent DoS attacks
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
+// Security: Disable X-Powered-By header
+app.disable('x-powered-by');
+
+// Security: Rate limiting - 100 requests per 15 minutes per IP
+app.use(rateLimiter({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  maxRequests: 100
+}));
+
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.status(200).json({ 
     status: 'ok', 
     environment: config.nodeEnv,

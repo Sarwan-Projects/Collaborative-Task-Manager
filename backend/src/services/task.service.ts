@@ -154,6 +154,7 @@ export class TaskService {
 
   /**
    * Delete a task
+   * Only the creator can delete their own tasks
    */
   async deleteTask(taskId: string, userId: string): Promise<void> {
     const task = await taskRepository.findById(taskId);
@@ -161,8 +162,13 @@ export class TaskService {
       throw new ApiError('Task not found', 404);
     }
 
+    // Handle both populated and non-populated creatorId
+    const creatorIdString = typeof task.creatorId === 'string' 
+      ? task.creatorId 
+      : task.creatorId._id.toString();
+
     // Only creator can delete the task
-    if (task.creatorId.toString() !== userId) {
+    if (creatorIdString !== userId) {
       throw new ApiError('Only the task creator can delete this task', 403);
     }
 

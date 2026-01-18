@@ -178,39 +178,42 @@ export default function Tasks() {
 
       <TaskFilters filters={filters} onChange={setFilters} onReset={resetFilters} />
 
-      {isLoading ? (
-        <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <TaskCardSkeleton key={i} />
-          ))}
-        </div>
-      ) : filteredTasks.length ? (
-        <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-          {filteredTasks.map((task) => (
-            <TaskCard
-              key={task._id}
-              task={task}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              currentUserId={user?.id}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Search className="w-8 h-8 text-gray-400" />
+      {/* Scrollable Task Container */}
+      <div className="max-h-[calc(100vh-400px)] overflow-y-auto pr-2 custom-scrollbar">
+        {isLoading ? (
+          <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <TaskCardSkeleton key={i} />
+            ))}
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No tasks found</h3>
-          <p className="text-gray-500 mb-6">
-            {searchQuery ? 'Try adjusting your search or filters' : 'Get started by creating your first task'}
-          </p>
-          <Button variant="gradient" onClick={() => setIsModalOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Create Task
-          </Button>
-        </div>
-      )}
+        ) : filteredTasks.length ? (
+          <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+            {filteredTasks.map((task) => (
+              <TaskCard
+                key={task._id}
+                task={task}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                currentUserId={user?.id}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No tasks found</h3>
+            <p className="text-gray-500 mb-6">
+              {searchQuery ? 'Try adjusting your search or filters' : 'Get started by creating your first task'}
+            </p>
+            <Button variant="gradient" onClick={() => setIsModalOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Task
+            </Button>
+          </div>
+        )}
+      </div>
 
       <Modal
         isOpen={isModalOpen}
