@@ -30,7 +30,7 @@ export default function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFo
       dueDate: task?.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
       priority: task?.priority || Priority.MEDIUM,
       status: task?.status || Status.TODO,
-      assignedToId: (task?.assignedToId as any)?._id || (task?.assignedToId as string) || ''
+      assignedToId: (task?.assignedToId as any)?._id || (task?.assignedToId as any)?.id || (task?.assignedToId as string) || ''
     }
   });
 
@@ -41,21 +41,30 @@ export default function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFo
     ...users.map((u) => ({ value: u.id, label: u.name }))
   ];
 
-  // Determine if user is creator or assignee
-  const isCreator = task && task.creatorId && 
-    (typeof task.creatorId === 'string' ? task.creatorId : (task.creatorId as any)._id || (task.creatorId as any).id);
-  const isAssignee = task && task.assignedToId &&
-    (typeof task.assignedToId === 'string' ? task.assignedToId : (task.assignedToId as any)._id || (task.assignedToId as any).id);
+  // Get current user from localStorage
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const currentUserId = currentUser.id || currentUser._id;
+
+  // Determine permissions
+  const creatorId = task?.creatorId 
+    ? (typeof task.creatorId === 'string' ? task.creatorId : (task.creatorId as any)._id || (task.creatorId as any).id)
+    : null;
+  const assigneeId = task?.assignedToId
+    ? (typeof task.assignedToId === 'string' ? task.assignedToId : (task.assignedToId as any)._id || (task.assignedToId as any).id)
+    : null;
   
-  // Assignee can only edit status
+  const isCreator = creatorId === currentUserId;
+  const isAssignee = assigneeId === currentUserId;
+  
+  // Assignee can only edit status, creator can edit all
   const isStatusOnlyMode = task && !isCreator && isAssignee;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {isStatusOnlyMode && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
-          <p className="text-sm text-amber-800">
-            ℹ️ You can only update the status of this task. Contact the creator to modify other details.
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+          <p className="text-sm text-blue-800 font-medium">
+            ℹ️ You can only update the status of this task. Contact the task creator to modify other details.
           </p>
         </div>
       )}

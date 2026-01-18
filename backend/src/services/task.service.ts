@@ -90,6 +90,7 @@ export class TaskService {
   /**
    * Update an existing task
    * Handles notifications only for completion and reassignment
+   * Enforces permissions: creator can edit all, assignee can only edit status
    */
   async updateTask(
     taskId: string,
@@ -99,6 +100,36 @@ export class TaskService {
     const existingTask = await taskRepository.findById(taskId);
     if (!existingTask) {
       throw new ApiError('Task not found', 404);
+    }
+
+    // Check permissions
+    const creatorIdString = typeof existingTask.creatorId === 'string'
+      ? existingTask.creatorId
+      : existingTask.creatorId._id.toString();
+    
+    const assigneeIdString = existingTask.assignedToId
+      ? (typeof existingTask.assignedToId === 'string'
+        ? existingTask.assignedToId
+        : existingTask.assignedToId._id.toString())
+      : null;
+
+    const isCreator = creatorIdString === userId;
+    const isAssignee = assigneeIdString === userId;
+
+    // If not creator or assignee, no permission to update
+    if (!isCreator && !isAssignee) {
+      throw new ApiError('You do not have permission to update this task', 403);
+    }
+
+    // If assignee but not creator, only allow status updates
+    if (isAssignee && !isCreator) {
+      const allowedFields = ['status'];
+      const requestedFields = Object.keys(data);
+      const unauthorizedFields = requestedFields.filter(f => !allowedFields.includes(f));
+      
+      if (unauthorizedFields.length > 0) {
+        throw new ApiError('You can only update the status of this task', 403);
+      }
     }
 
     // Track changes for audit log
@@ -120,7 +151,7 @@ export class TaskService {
         if (existingTask.creatorId.toString() !== userId) {
           await notificationRepository.create({
             userId: existingTask.creatorId.toString(),
-            message: `Task "${existingTask.title}" has been completed`,
+            message: `🎉 Task "${existingTask.title}" has been completed!`,
             taskId
           });
         }

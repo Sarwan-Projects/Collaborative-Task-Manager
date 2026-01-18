@@ -121,9 +121,9 @@ export default function Navbar() {
                   {/* Invitations Section */}
                   {invitations.length > 0 && (
                     <div className="border-b border-gray-100">
-                      <div className="px-4 py-2 bg-indigo-50">
+                      <div className="px-4 py-2.5 bg-gradient-to-r from-indigo-50 to-purple-50">
                         <div className="flex items-center gap-2">
-                          <Inbox className="w-4 h-4 text-indigo-600" />
+                          <span className="text-base">📋</span>
                           <span className="text-sm font-semibold text-indigo-900">
                             Task Invitations ({invitations.length})
                           </span>
@@ -136,17 +136,25 @@ export default function Navbar() {
                           onClick={() => setIsNotifOpen(false)}
                           className="block px-4 py-3 hover:bg-indigo-50 transition-colors border-l-2 border-indigo-500"
                         >
-                          <p className="text-sm text-gray-800 font-medium">{inv.taskId.title}</p>
-                          <p className="text-xs text-gray-500 mt-1">From: {inv.fromUserId.name}</p>
+                          <div className="flex items-start gap-2">
+                            <span className="text-sm mt-0.5">📋</span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-gray-800 font-medium line-clamp-1">{inv.taskId.title}</p>
+                              <p className="text-xs text-gray-600 mt-0.5">
+                                <span className="font-medium text-indigo-600">{inv.fromUserId.name}</span>
+                                <span className="text-gray-500"> wants you to work on this</span>
+                              </p>
+                            </div>
+                          </div>
                         </Link>
                       ))}
                       {invitations.length > 3 && (
                         <Link
                           to="/dashboard"
                           onClick={() => setIsNotifOpen(false)}
-                          className="block px-4 py-2 text-center text-sm text-indigo-600 hover:bg-indigo-50"
+                          className="block px-4 py-2 text-center text-sm text-indigo-600 hover:bg-indigo-50 font-medium"
                         >
-                          View all {invitations.length} invitations
+                          View all {invitations.length} invitations →
                         </Link>
                       )}
                     </div>

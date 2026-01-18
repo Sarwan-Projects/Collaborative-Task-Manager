@@ -50,7 +50,7 @@ export class TaskInvitationService {
 
     await notificationRepository.create({
       userId: fromUserIdString,
-      message: `${user?.name} accepted the task assignment: "${(invitation.taskId as any).title}"`,
+      message: `✅ ${user?.name} accepted your task assignment: "${(invitation.taskId as any).title}"`,
       taskId: taskIdString
     });
 
@@ -93,7 +93,7 @@ export class TaskInvitationService {
 
     await notificationRepository.create({
       userId: fromUserIdString,
-      message: `${user?.name} rejected the task assignment: "${(invitation.taskId as any).title}"`,
+      message: `❌ ${user?.name} declined your task assignment: "${(invitation.taskId as any).title}"`,
       taskId: taskIdString
     });
 

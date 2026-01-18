@@ -22,7 +22,16 @@ export default function TaskCard({ task, onEdit, onDelete, currentUserId }: Task
   const creatorId = typeof task.creatorId === 'string' 
     ? task.creatorId 
     : (creator?.id || (creator as any)?._id?.toString() || (creator as any)?._id);
+  const assigneeId = assignee 
+    ? (typeof task.assignedToId === 'string' 
+      ? task.assignedToId 
+      : (assignee?.id || (assignee as any)?._id?.toString() || (assignee as any)?._id))
+    : null;
+  
   const isCreator = creatorId === currentUserId;
+  const isAssignee = assigneeId === currentUserId;
+  const canEdit = isCreator || isAssignee;
+  const canDelete = isCreator;
 
   return (
     <div className={`bg-white rounded-2xl border p-5 card-hover shadow-sm hover:shadow-xl group ${
@@ -37,7 +46,7 @@ export default function TaskCard({ task, onEdit, onDelete, currentUserId }: Task
           {task.title}
         </h3>
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          {task.status !== Status.COMPLETED && (
+          {task.status !== Status.COMPLETED && canEdit && (
             <button
               onClick={() => onEdit(task)}
               className="p-2 text-gray-400 hover:text-indigo-600 rounded-lg hover:bg-indigo-50 transition-all"
@@ -46,7 +55,7 @@ export default function TaskCard({ task, onEdit, onDelete, currentUserId }: Task
               <Edit className="w-4 h-4" />
             </button>
           )}
-          {isCreator && (
+          {canDelete && (
             <button
               onClick={() => onDelete(task._id)}
               className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-all"
@@ -97,16 +106,31 @@ export default function TaskCard({ task, onEdit, onDelete, currentUserId }: Task
           )}
         </div>
         
-        {assignee && (
-          <div className="flex items-center gap-2 text-gray-500">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
-              <span className="text-xs text-white font-medium">
-                {(assignee.name || assignee.email || '?')[0].toUpperCase()}
+        {/* Show Creator → Assignee */}
+        <div className="flex items-center gap-2 text-gray-600 text-xs">
+          <div className="flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded-lg">
+            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+              <span className="text-[10px] text-white font-semibold">
+                {(creator?.name || creator?.email || '?')[0].toUpperCase()}
               </span>
             </div>
-            <span>{assignee.name || assignee.email}</span>
+            <span className="font-medium truncate max-w-[80px]">{creator?.name || 'Unknown'}</span>
           </div>
-        )}
+          
+          {assignee && (
+            <>
+              <span className="text-gray-400">→</span>
+              <div className="flex items-center gap-1.5 bg-indigo-50 px-2.5 py-1 rounded-lg">
+                <div className="w-5 h-5 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                  <span className="text-[10px] text-white font-semibold">
+                    {(assignee.name || assignee.email || '?')[0].toUpperCase()}
+                  </span>
+                </div>
+                <span className="font-medium truncate max-w-[80px]">{assignee.name || 'Unknown'}</span>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Progress indicator for status */}
