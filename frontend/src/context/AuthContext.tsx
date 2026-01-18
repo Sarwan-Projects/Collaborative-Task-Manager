@@ -24,10 +24,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedUser = localStorage.getItem('user');
     
     if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
+      // Validate token by making a request to /auth/me
+      api.get('/auth/me')
+        .then(response => {
+          const userData = response.data.data;
+          setToken(storedToken);
+          setUser(userData);
+        })
+        .catch(() => {
+          // Token invalid or user doesn't exist, clear storage
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setUser(null);
+          setToken(null);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    } else {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
