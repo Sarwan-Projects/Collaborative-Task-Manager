@@ -11,12 +11,18 @@ let io: Server;
  * Sets up authentication and event handlers for real-time communication
  */
 export const initializeSocket = (httpServer: HttpServer): Server => {
+  const allowedOrigins = config.isProduction 
+    ? ['https://collaborative-task-manager-indol.vercel.app']
+    : ['http://localhost:5173', 'http://localhost:3000'];
+
   io = new Server(httpServer, {
     cors: {
-      origin: config.frontendUrl,
+      origin: allowedOrigins,
       methods: ['GET', 'POST'],
       credentials: true
-    }
+    },
+    transports: ['websocket', 'polling'],
+    allowEIO3: true
   });
 
   // Authentication middleware for socket connections
