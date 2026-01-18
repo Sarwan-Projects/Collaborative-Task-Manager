@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Plus, Search, LayoutGrid, List } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Search, LayoutGrid, List, Keyboard } from 'lucide-react';
 import { useTasks, useCreateTask, useUpdateTask, useDeleteTask } from '../hooks/useTasks';
 import { useAuth } from '../context/AuthContext';
 import { Task, TaskFilters as Filters } from '../types';
@@ -18,12 +18,37 @@ export default function Tasks() {
   const [filters, setFilters] = useState<Filters>({ sortBy: 'dueDate', sortOrder: 'asc' });
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [showShortcuts, setShowShortcuts] = useState(false);
   
   const { user } = useAuth();
   const { data: tasks = [], isLoading } = useTasks(filters);
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Ignore if typing in input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      
+      if (e.key === 'n' && !isModalOpen) {
+        e.preventDefault();
+        setIsModalOpen(true);
+      } else if (e.key === 'Escape' && isModalOpen) {
+        closeModal();
+      } else if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        e.preventDefault();
+        setShowShortcuts(!showShortcuts);
+      } else if (e.key === 'g' && !isModalOpen) {
+        e.preventDefault();
+        setViewMode(viewMode === 'grid' ? 'list' : 'grid');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [isModalOpen, showShortcuts, viewMode]);
 
   const filteredTasks = tasks.filter(task => 
     task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -74,11 +99,48 @@ export default function Tasks() {
             {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'} total
           </p>
         </div>
-        <Button variant="gradient" onClick={() => setIsModalOpen(true)} size="lg">
-          <Plus className="w-5 h-5 mr-2" />
-          New Task
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="ghost" 
+            onClick={() => setShowShortcuts(!showShortcuts)}
+            title="Keyboard shortcuts"
+          >
+            <Keyboard className="w-5 h-5" />
+          </Button>
+          <Button variant="gradient" onClick={() => setIsModalOpen(true)} size="lg">
+            <Plus className="w-5 h-5 mr-2" />
+            New Task
+          </Button>
+        </div>
       </div>
+
+      {/* Keyboard Shortcuts Help */}
+      {showShortcuts && (
+        <div className="mb-6 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 p-6 fade-in">
+          <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Keyboard className="w-5 h-5 text-indigo-600" />
+            Keyboard Shortcuts
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div className="flex items-center gap-3">
+              <kbd className="px-2 py-1 bg-white rounded border border-gray-300 font-mono text-xs">N</kbd>
+              <span className="text-gray-600">Create new task</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <kbd className="px-2 py-1 bg-white rounded border border-gray-300 font-mono text-xs">G</kbd>
+              <span className="text-gray-600">Toggle grid/list view</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <kbd className="px-2 py-1 bg-white rounded border border-gray-300 font-mono text-xs">ESC</kbd>
+              <span className="text-gray-600">Close modal</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <kbd className="px-2 py-1 bg-white rounded border border-gray-300 font-mono text-xs">?</kbd>
+              <span className="text-gray-600">Show/hide shortcuts</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Search and View Toggle */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">

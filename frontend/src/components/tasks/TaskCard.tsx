@@ -1,5 +1,5 @@
-import { format, isPast, formatDistanceToNow } from 'date-fns';
-import { Calendar, Trash2, Edit, Clock, AlertCircle } from 'lucide-react';
+import { format, isPast, formatDistanceToNow, differenceInHours } from 'date-fns';
+import { Calendar, Trash2, Edit, Clock, AlertCircle, AlertTriangle } from 'lucide-react';
 import { Task, User, Status } from '../../types';
 import Badge from '../ui/Badge';
 
@@ -13,18 +13,25 @@ interface TaskCardProps {
 export default function TaskCard({ task, onEdit, onDelete, currentUserId }: TaskCardProps) {
   const creator = task.creatorId as User;
   const assignee = task.assignedToId as User | null;
-  const isOverdue = isPast(new Date(task.dueDate)) && task.status !== Status.COMPLETED;
+  const dueDate = new Date(task.dueDate);
+  const isOverdue = isPast(dueDate) && task.status !== Status.COMPLETED;
+  const hoursUntilDue = differenceInHours(dueDate, new Date());
+  const isDueSoon = hoursUntilDue > 0 && hoursUntilDue <= 48 && task.status !== Status.COMPLETED;
   
   // Handle both id and _id fields from backend
   const creatorId = typeof task.creatorId === 'string' 
     ? task.creatorId 
     : (creator?.id || (creator as any)?._id?.toString() || (creator as any)?._id);
   const isCreator = creatorId === currentUserId;
-  
-  const dueDate = new Date(task.dueDate);
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 hover:border-indigo-200 p-5 card-hover shadow-sm hover:shadow-xl group">
+    <div className={`bg-white rounded-2xl border p-5 card-hover shadow-sm hover:shadow-xl group ${
+      isOverdue 
+        ? 'border-red-200 hover:border-red-300' 
+        : isDueSoon 
+        ? 'border-amber-200 hover:border-amber-300' 
+        : 'border-gray-100 hover:border-indigo-200'
+    }`}>
       <div className="flex justify-between items-start mb-3">
         <h3 className="font-semibold text-gray-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">
           {task.title}
@@ -64,9 +71,13 @@ export default function TaskCard({ task, onEdit, onDelete, currentUserId }: Task
       </div>
 
       <div className="flex flex-col gap-2 text-sm">
-        <div className={`flex items-center gap-2 ${isOverdue ? 'text-red-600' : 'text-gray-500'}`}>
+        <div className={`flex items-center gap-2 ${
+          isOverdue ? 'text-red-600' : isDueSoon ? 'text-amber-600' : 'text-gray-500'
+        }`}>
           {isOverdue ? (
             <AlertCircle className="w-4 h-4" />
+          ) : isDueSoon ? (
+            <AlertTriangle className="w-4 h-4" />
           ) : (
             <Calendar className="w-4 h-4" />
           )}
@@ -74,6 +85,10 @@ export default function TaskCard({ task, onEdit, onDelete, currentUserId }: Task
           {isOverdue ? (
             <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
               Overdue
+            </span>
+          ) : isDueSoon ? (
+            <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
+              Due Soon
             </span>
           ) : (
             <span className="text-xs text-gray-400">
