@@ -1,0 +1,76 @@
+import { taskInvitationRepository } from '../repositories/taskInvitation.repository';
+import { taskRepository } from '../repositories/task.repository';
+import { notificationRepository } from '../repositories/notification.repository';
+import { userRepository } from '../repositories/user.repository';
+import { ApiError } from '../middleware/error.middleware';
+
+export class TaskInvitationService {
+  async getUserInvitations(userId: string) {
+    return taskInvitationRepository.findByUser(userId);
+  }
+
+  async acceptInvitation(invitationId: string, userId: string) {
+    const invitation = await taskInvitationRepository.findById(invitationId);
+    
+    if (!invitation) {
+      throw new ApiError('Invitation not found', 404);
+    }
+
+    if (invitation.toUserId.toString() !== userId) {
+      throw new ApiError('Not authorized to accept this invitation', 403);
+    }
+
+    if (invitation.status !== 'pending') {
+      throw new ApiError('Invitation already processed', 400);
+    }
+
+    // Update invitation status
+    await taskInvitationRepository.updateStatus(invitationId, 'accepted');
+
+    // Assign task to user
+    await taskRepository.update(invitation.taskId.toString(), {
+      assignedToId: userId
+    });
+
+    // Notify creator
+    const user = await userRepository.findById(userId);
+    await notificationRepository.create({
+      userId: invitation.fromUserId.toString(),
+      message: `${user?.name} accepted the task assignment: "${(invitation.taskId as any).title}"`,
+      taskId: invitation.taskId.toString()
+    });
+
+    return invitation;
+  }
+
+  async rejectInvitation(invitationId: string, userId: string) {
+    const invitation = await taskInvitationRepository.findById(invitationId);
+    
+    if (!invitation) {
+      throw new ApiError('Invitation not found', 404);
+    }
+
+    if (invitation.toUserId.toString() !== userId) {
+      throw new ApiError('Not authorized to reject this invitation', 403);
+    }
+
+    if (invitation.status !== 'pending') {
+      throw new ApiError('Invitation already processed', 400);
+    }
+
+    // Update invitation status
+    await taskInvitationRepository.updateStatus(invitationId, 'rejected');
+
+    // Notify creator
+    const user = await userRepository.findById(userId);
+    await notificationRepository.create({
+      userId: invitation.fromUserId.toString(),
+      message: `${user?.name} rejected the task assignment: "${(invitation.taskId as any).title}"`,
+      taskId: invitation.taskId.toString()
+    });
+
+    return invitation;
+  }
+}
+
+export const taskInvitationService = new TaskInvitationService();

@@ -2,6 +2,7 @@ import { taskRepository } from '../repositories/task.repository';
 import { notificationRepository } from '../repositories/notification.repository';
 import { auditLogRepository } from '../repositories/auditLog.repository';
 import { userRepository } from '../repositories/user.repository';
+import { taskInvitationRepository } from '../repositories/taskInvitation.repository';
 import { CreateTaskInput, UpdateTaskInput, TaskFilterInput } from '../dtos/task.dto';
 import { ApiError } from '../middleware/error.middleware';
 import { ITaskDocument } from '../models/Task';
@@ -13,7 +14,7 @@ import { ITaskDocument } from '../models/Task';
 export class TaskService {
   /**
    * Create a new task
-   * Validates input and creates task with creator reference
+   * Creates invitation instead of directly assigning
    */
   async createTask(
     data: CreateTaskInput,
@@ -27,13 +28,24 @@ export class TaskService {
       }
     }
 
-    const task = await taskRepository.create({ ...data, creatorId });
+    // Create task without assignee initially
+    const task = await taskRepository.create({ 
+      ...data, 
+      creatorId,
+      assignedToId: undefined // Don't assign yet
+    });
     
-    // Create notification if task is assigned to someone
+    // If assignee provided, create invitation
     if (data.assignedToId && data.assignedToId !== creatorId) {
+      await taskInvitationRepository.create({
+        taskId: task._id.toString(),
+        fromUserId: creatorId,
+        toUserId: data.assignedToId
+      });
+
       await notificationRepository.create({
         userId: data.assignedToId,
-        message: `You have been assigned a new task: "${task.title}"`,
+        message: `${(await userRepository.findById(creatorId))?.name} wants to assign you a task: "${task.title}". Please accept or reject.`,
         taskId: task._id.toString()
       });
     }
@@ -63,7 +75,7 @@ export class TaskService {
 
   /**
    * Update an existing task
-   * Handles notifications only for completion
+   * Handles notifications only for completion and reassignment
    */
   async updateTask(
     taskId: string,
@@ -89,13 +101,18 @@ export class TaskService {
         newValue: data.status
       });
 
-      // Only notify creator when task is completed
-      if (data.status === 'Completed' && existingTask.creatorId.toString() !== userId) {
-        await notificationRepository.create({
-          userId: existingTask.creatorId.toString(),
-          message: `Task "${existingTask.title}" has been completed`,
-          taskId
-        });
+      // Notify creator when task is completed and delete task notifications
+      if (data.status === 'Completed') {
+        if (existingTask.creatorId.toString() !== userId) {
+          await notificationRepository.create({
+            userId: existingTask.creatorId.toString(),
+            message: `Task "${existingTask.title}" has been completed`,
+            taskId
+          });
+        }
+        
+        // Delete all notifications for this task
+        await notificationRepository.deleteByTask(taskId);
       }
     }
 
@@ -111,37 +128,43 @@ export class TaskService {
       });
     }
 
-    // Check for assignee change - only notify on initial assignment
+    // Check for assignee change - create invitation for new assignee
     if (data.assignedToId !== undefined) {
       const oldAssignee = existingTask.assignedToId?.toString() || null;
       const newAssignee = data.assignedToId || null;
 
-      if (oldAssignee !== newAssignee) {
+      if (oldAssignee !== newAssignee && newAssignee) {
         changes.push('assignee');
 
         // Validate new assignee exists
-        if (newAssignee) {
-          const assignee = await userRepository.findById(newAssignee);
-          if (!assignee) {
-            throw new ApiError('Assigned user not found', 404);
-          }
-
-          // Only notify if this is a new assignment (not reassignment)
-          if (!oldAssignee) {
-            await notificationRepository.create({
-              userId: newAssignee,
-              message: `You have been assigned to task: "${existingTask.title}"`,
-              taskId
-            });
-          }
+        const assignee = await userRepository.findById(newAssignee);
+        if (!assignee) {
+          throw new ApiError('Assigned user not found', 404);
         }
+
+        // Create invitation for new assignee
+        await taskInvitationRepository.create({
+          taskId,
+          fromUserId: userId,
+          toUserId: newAssignee
+        });
+
+        const creator = await userRepository.findById(userId);
+        await notificationRepository.create({
+          userId: newAssignee,
+          message: `${creator?.name} wants to assign you a task: "${existingTask.title}". Please accept or reject.`,
+          taskId
+        });
+
+        // Don't update assignedToId yet - wait for acceptance
+        delete data.assignedToId;
 
         await auditLogRepository.create({
           taskId,
           userId,
           action: 'ASSIGNEE_CHANGED',
           previousValue: oldAssignee || 'Unassigned',
-          newValue: newAssignee || 'Unassigned'
+          newValue: 'Pending acceptance'
         });
       }
     }
@@ -176,8 +199,9 @@ export class TaskService {
 
     await taskRepository.delete(taskId);
 
-    // Delete associated notifications
+    // Delete associated notifications and invitations
     await notificationRepository.deleteByTask(taskId);
+    await taskInvitationRepository.deleteByTask(taskId);
 
     await auditLogRepository.create({
       taskId,

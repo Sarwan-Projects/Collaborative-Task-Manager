@@ -2,6 +2,7 @@ import { Router } from 'express';
 import authRoutes from './auth.routes';
 import taskRoutes from './task.routes';
 import notificationRoutes from './notification.routes';
+import taskInvitationRoutes from './taskInvitation.routes';
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.get('/health', (_req, res) => {
 router.use('/auth', authRoutes);
 router.use('/tasks', taskRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/invitations', taskInvitationRoutes);
 
 export default router;
