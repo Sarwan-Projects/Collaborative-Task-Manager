@@ -63,7 +63,7 @@ export class TaskService {
 
   /**
    * Update an existing task
-   * Handles notifications and audit logging
+   * Handles notifications only for completion
    */
   async updateTask(
     taskId: string,
@@ -75,7 +75,7 @@ export class TaskService {
       throw new ApiError('Task not found', 404);
     }
 
-    // Track changes for audit log and real-time updates
+    // Track changes for audit log
     const changes: string[] = [];
 
     // Check for status change
@@ -89,7 +89,7 @@ export class TaskService {
         newValue: data.status
       });
 
-      // If task is completed, notify the creator
+      // Only notify creator when task is completed
       if (data.status === 'Completed' && existingTask.creatorId.toString() !== userId) {
         await notificationRepository.create({
           userId: existingTask.creatorId.toString(),
@@ -111,7 +111,7 @@ export class TaskService {
       });
     }
 
-    // Check for assignee change
+    // Check for assignee change - only notify on initial assignment
     if (data.assignedToId !== undefined) {
       const oldAssignee = existingTask.assignedToId?.toString() || null;
       const newAssignee = data.assignedToId || null;
@@ -126,12 +126,14 @@ export class TaskService {
             throw new ApiError('Assigned user not found', 404);
           }
 
-          // Notify new assignee
-          await notificationRepository.create({
-            userId: newAssignee,
-            message: `You have been assigned to task: "${existingTask.title}"`,
-            taskId
-          });
+          // Only notify if this is a new assignment (not reassignment)
+          if (!oldAssignee) {
+            await notificationRepository.create({
+              userId: newAssignee,
+              message: `You have been assigned to task: "${existingTask.title}"`,
+              taskId
+            });
+          }
         }
 
         await auditLogRepository.create({

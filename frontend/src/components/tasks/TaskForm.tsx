@@ -41,12 +41,30 @@ export default function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFo
     ...users.map((u) => ({ value: u.id, label: u.name }))
   ];
 
+  // Determine if user is creator or assignee
+  const isCreator = task && task.creatorId && 
+    (typeof task.creatorId === 'string' ? task.creatorId : (task.creatorId as any)._id || (task.creatorId as any).id);
+  const isAssignee = task && task.assignedToId &&
+    (typeof task.assignedToId === 'string' ? task.assignedToId : (task.assignedToId as any)._id || (task.assignedToId as any).id);
+  
+  // Assignee can only edit status
+  const isStatusOnlyMode = task && !isCreator && isAssignee;
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      {isStatusOnlyMode && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+          <p className="text-sm text-amber-800">
+            ℹ️ You can only update the status of this task. Contact the creator to modify other details.
+          </p>
+        </div>
+      )}
+
       <Input
         label="Title"
         placeholder="What needs to be done?"
         error={errors.title?.message}
+        disabled={isStatusOnlyMode}
         {...register('title')}
       />
 
@@ -54,6 +72,7 @@ export default function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFo
         label="Description"
         placeholder="Add more details about this task..."
         error={errors.description?.message}
+        disabled={isStatusOnlyMode}
         {...register('description')}
       />
 
@@ -62,6 +81,7 @@ export default function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFo
           type="date"
           label="Due Date"
           error={errors.dueDate?.message}
+          disabled={isStatusOnlyMode}
           {...register('dueDate')}
         />
 
@@ -69,6 +89,7 @@ export default function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFo
           label="Assign To"
           options={userOptions}
           error={errors.assignedToId?.message}
+          disabled={isStatusOnlyMode}
           {...register('assignedToId')}
         />
       </div>
@@ -78,6 +99,7 @@ export default function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFo
           label="Priority"
           options={priorityOptions}
           error={errors.priority?.message}
+          disabled={isStatusOnlyMode}
           {...register('priority')}
         />
 
