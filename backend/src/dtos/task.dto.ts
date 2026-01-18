@@ -24,8 +24,9 @@ export const CreateTaskDto = z.object({
     .default(Status.TODO),
   assignedToId: z
     .string()
-    .optional()
+    .transform(val => val === '' ? null : val)
     .nullable()
+    .optional()
 });
 
 /**
@@ -54,8 +55,9 @@ export const UpdateTaskDto = z.object({
     .optional(),
   assignedToId: z
     .string()
-    .optional()
+    .transform(val => val === '' ? null : val)
     .nullable()
+    .optional()
 });
 
 /**
