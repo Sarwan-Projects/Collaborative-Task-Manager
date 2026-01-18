@@ -18,6 +18,24 @@ interface TaskFormProps {
 export default function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFormProps) {
   const { data: users = [] } = useUsers();
 
+  // Get current user from localStorage
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const currentUserId = currentUser.id || currentUser._id;
+
+  // Determine permissions
+  const creatorId = task?.creatorId 
+    ? (typeof task.creatorId === 'string' ? task.creatorId : (task.creatorId as any)._id || (task.creatorId as any).id)
+    : null;
+  const assigneeId = task?.assignedToId
+    ? (typeof task.assignedToId === 'string' ? task.assignedToId : (task.assignedToId as any)._id || (task.assignedToId as any).id)
+    : null;
+  
+  const isCreator = creatorId === currentUserId;
+  const isAssignee = assigneeId === currentUserId;
+  
+  // Assignee can only edit status, creator can edit all
+  const isStatusOnlyMode = task && !isCreator && isAssignee;
+
   const {
     register,
     handleSubmit,
@@ -38,30 +56,11 @@ export default function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFo
   const statusOptions = Object.values(Status).map((s) => ({ value: s, label: s }));
   
   // Build user options - include "Unassigned" only for new tasks or when creator is editing
-  const assignedUserId = (task?.assignedToId as any)?._id || (task?.assignedToId as any)?.id || (task?.assignedToId as string) || '';
   const userOptions = [
     // Only show "Unassigned" option if no task exists or if creator is editing
     ...(!task || isCreator ? [{ value: '', label: 'Unassigned' }] : []),
     ...users.map((u) => ({ value: u.id, label: u.name }))
   ];
-
-  // Get current user from localStorage
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-  const currentUserId = currentUser.id || currentUser._id;
-
-  // Determine permissions
-  const creatorId = task?.creatorId 
-    ? (typeof task.creatorId === 'string' ? task.creatorId : (task.creatorId as any)._id || (task.creatorId as any).id)
-    : null;
-  const assigneeId = task?.assignedToId
-    ? (typeof task.assignedToId === 'string' ? task.assignedToId : (task.assignedToId as any)._id || (task.assignedToId as any).id)
-    : null;
-  
-  const isCreator = creatorId === currentUserId;
-  const isAssignee = assigneeId === currentUserId;
-  
-  // Assignee can only edit status, creator can edit all
-  const isStatusOnlyMode = task && !isCreator && isAssignee;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">

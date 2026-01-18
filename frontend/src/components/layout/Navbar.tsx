@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Bell, User, LogOut, LayoutDashboard, ListTodo, Zap, Trash2, Inbox } from 'lucide-react';
+import { Menu, X, Bell, User, LogOut, LayoutDashboard, ListTodo, Zap, Trash2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSocket } from '../../context/SocketContext';
 import { useNotifications, useMarkAllAsRead, useDeleteNotification } from '../../hooks/useNotifications';
