@@ -41,11 +41,9 @@ export const UpdateTaskDto = z.object({
     .optional(),
   description: z
     .string()
-    .min(1, 'Description cannot be empty')
     .optional(),
   dueDate: z
     .string()
-    .refine((val) => !isNaN(Date.parse(val)), 'Invalid date format')
     .optional(),
   priority: z
     .nativeEnum(Priority)
@@ -58,7 +56,7 @@ export const UpdateTaskDto = z.object({
     .transform(val => val === '' ? null : val)
     .nullable()
     .optional()
-});
+}).partial();
 
 /**
  * DTO for filtering tasks
