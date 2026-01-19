@@ -44,7 +44,7 @@ export default function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFo
     handleSubmit,
     formState: { errors }
   } = useForm<TaskInput>({
-    resolver: zodResolver(taskSchema),
+    resolver: isStatusOnlyMode ? undefined : zodResolver(taskSchema),
     defaultValues: {
       title: task?.title || '',
       description: task?.description || '',

@@ -42,41 +42,16 @@ export default function Register() {
   };
 
   const features = [
-    { icon: '🚀', text: 'Real-time collaboration' },
-    { icon: '⚡', text: 'Smart task assignments' },
-    { icon: '📊', text: 'Progress tracking' },
-    { icon: '🔔', text: 'Instant notifications' }
+    { text: 'Real-time collaboration' },
+    { text: 'Smart task assignments' },
+    { text: 'Progress tracking' },
+    { text: 'Instant notifications' }
   ];
 
   return (
     <div className="min-h-screen flex">
-      {/* Left side - Decorative */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 items-center justify-center p-12 relative overflow-hidden">
-        {/* Animated background blobs */}
-        <div className="absolute top-20 right-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-blob" />
-        <div className="absolute bottom-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-blob animation-delay-4000" />
-        
-        <div className="max-w-lg text-white relative z-10">
-          <h2 className="text-4xl font-bold mb-6 leading-tight">
-            Join Thousands of Productive Teams
-          </h2>
-          <p className="text-lg text-white/90 mb-8 leading-relaxed">
-            Create your account and unlock powerful features designed to streamline 
-            your workflow and boost team productivity.
-          </p>
-          <div className="space-y-4">
-            {features.map((feature, i) => (
-              <div key={i} className="flex items-center gap-4 bg-white/10 backdrop-blur rounded-xl p-4 border border-white/20">
-                <div className="text-2xl">{feature.icon}</div>
-                <span className="text-white/90 font-medium">{feature.text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Right side - Form */}
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      {/* Left side - Form */}
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gray-50">
         <div className="w-full max-w-md">
           <div className="text-center mb-10">
             <Link to="/" className="inline-flex items-center gap-2 mb-8 group">
@@ -136,8 +111,53 @@ export default function Register() {
           </div>
 
           <p className="text-center text-xs text-gray-500 mt-8 px-4">
-            By creating an account, you agree to our Terms of Service and Privacy Policy
+            Protected by enterprise-grade security. Your data is encrypted and secure.
           </p>
+        </div>
+      </div>
+
+      {/* Right side - Decorative */}
+      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 items-center justify-center p-12 relative overflow-hidden">
+        {/* Animated background blobs */}
+        <div className="absolute top-20 right-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute bottom-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-blob animation-delay-4000" />
+        
+        <div className="max-w-lg text-white relative z-10">
+          <h2 className="text-4xl font-bold mb-6 leading-tight">
+            Join Thousands of Productive Teams
+          </h2>
+          <p className="text-lg text-white/90 mb-8 leading-relaxed">
+            Create your account and unlock powerful features designed to streamline 
+            your workflow and boost team productivity.
+          </p>
+          <div className="space-y-4 mb-8">
+            {features.map((feature, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <span className="text-white/90">{feature.text}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center gap-4 pt-6 border-t border-white/20">
+            <div className="flex -space-x-3">
+              {['A', 'B', 'C', 'D'].map((letter, i) => (
+                <div 
+                  key={i}
+                  className="w-10 h-10 rounded-full bg-white/20 backdrop-blur border-2 border-white/40 flex items-center justify-center text-sm font-semibold shadow-lg"
+                >
+                  {letter}
+                </div>
+              ))}
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">Trusted by teams worldwide</p>
+              <p className="text-xs text-white/70">Join thousands of productive users</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
