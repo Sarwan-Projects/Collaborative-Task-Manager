@@ -32,31 +32,19 @@ export const CreateTaskDto = z.object({
 /**
  * DTO for updating an existing task
  * All fields are optional for partial updates
+ * Lenient validation to allow status-only updates
  */
 export const UpdateTaskDto = z.object({
-  title: z
-    .string()
-    .min(1, 'Title cannot be empty')
-    .max(100, 'Title cannot exceed 100 characters')
-    .optional(),
-  description: z
-    .string()
-    .optional(),
-  dueDate: z
-    .string()
-    .optional(),
-  priority: z
-    .nativeEnum(Priority)
-    .optional(),
-  status: z
-    .nativeEnum(Status)
-    .optional(),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  dueDate: z.string().optional(),
+  priority: z.nativeEnum(Priority).optional(),
+  status: z.nativeEnum(Status).optional(),
   assignedToId: z
-    .string()
-    .transform(val => val === '' ? null : val)
-    .nullable()
+    .union([z.string(), z.null()])
     .optional()
-}).partial();
+    .transform(val => val === '' ? null : val)
+}).passthrough();
 
 /**
  * DTO for filtering tasks
