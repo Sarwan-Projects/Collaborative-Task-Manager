@@ -56,7 +56,15 @@ export default function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFo
   });
 
   const priorityOptions = Object.values(Priority).map((p) => ({ value: p, label: p }));
-  const statusOptions = Object.values(Status).map((s) => ({ value: s, label: s }));
+  
+  // Assignees can only change status to To Do, In Progress, or Review (not Completed)
+  const statusOptions = isStatusOnlyMode 
+    ? [
+        { value: Status.TODO, label: Status.TODO },
+        { value: Status.IN_PROGRESS, label: Status.IN_PROGRESS },
+        { value: Status.REVIEW, label: Status.REVIEW }
+      ]
+    : Object.values(Status).map((s) => ({ value: s, label: s }));
   
   // Build user options - include "Unassigned" only for new tasks or when creator is editing
   const userOptions = [
@@ -66,7 +74,14 @@ export default function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFo
   ];
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit((data) => {
+      // If assignee (status-only mode), only send status field
+      if (isStatusOnlyMode) {
+        onSubmit({ status: data.status });
+      } else {
+        onSubmit(data);
+      }
+    })} className="space-y-5">
       {isStatusOnlyMode && (
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
           <p className="text-sm text-blue-800 font-medium">

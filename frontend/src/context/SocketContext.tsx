@@ -55,8 +55,20 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['task', task._id] });
       
-      if (changes.includes('status') || changes.includes('priority') || changes.includes('assignee')) {
-        toast.success(`Task "${task.title}" has been updated`);
+      // Only show toast if the update was made by someone else
+      // (The mutation already shows a toast for the current user)
+      const taskCreatorId = typeof task.creatorId === 'string' 
+        ? task.creatorId 
+        : task.creatorId?.id || task.creatorId?._id;
+      const taskAssigneeId = typeof task.assignedToId === 'string'
+        ? task.assignedToId
+        : task.assignedToId?.id || task.assignedToId?._id;
+      
+      // Don't show toast if current user is creator or assignee (they already see the mutation toast)
+      if (user && taskCreatorId !== user.id && taskAssigneeId !== user.id) {
+        if (changes.includes('status') || changes.includes('priority') || changes.includes('assignee')) {
+          toast.success(`📋 Task "${task.title}" has been updated`);
+        }
       }
     });
 

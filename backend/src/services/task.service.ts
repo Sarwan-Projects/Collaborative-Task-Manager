@@ -146,18 +146,55 @@ export class TaskService {
         newValue: data.status
       });
 
-      // Notify creator when task is completed and delete task notifications
+      // Handle status change notifications
       if (data.status === 'Completed') {
-        if (existingTask.creatorId.toString() !== userId) {
+        // Only creator can mark as completed
+        if (!isCreator) {
+          throw new ApiError('Only the task creator can mark the task as completed', 403);
+        }
+
+        // Notify assignee that task is completed
+        if (existingTask.assignedToId && existingTask.assignedToId.toString() !== userId) {
+          const creator = await userRepository.findById(userId);
           await notificationRepository.create({
-            userId: existingTask.creatorId.toString(),
-            message: `🎉 Task "${existingTask.title}" has been completed!`,
+            userId: existingTask.assignedToId.toString(),
+            message: `✅ Your task "${existingTask.title}" has been marked as completed by ${creator?.name}!`,
             taskId
           });
         }
         
-        // Delete all notifications for this task
+        // Delete the task after marking as completed (cleanup)
+        await taskRepository.delete(taskId);
         await notificationRepository.deleteByTask(taskId);
+        await taskInvitationRepository.deleteByTask(taskId);
+        
+        // Return the task before deletion for the response
+        const deletedTask = { ...existingTask.toObject(), status: 'Completed' };
+        return { task: deletedTask as any, changes };
+      } else if (data.status === 'Review') {
+        // Assignee moved to review, notify creator
+        if (isAssignee && !isCreator && existingTask.creatorId.toString() !== userId) {
+          const assignee = await userRepository.findById(userId);
+          await notificationRepository.create({
+            userId: existingTask.creatorId.toString(),
+            message: `👀 ${assignee?.name} has submitted "${existingTask.title}" for your review`,
+            taskId
+          });
+        }
+      } else if (isCreator && existingTask.assignedToId && existingTask.assignedToId.toString() !== userId) {
+        // Creator changed status back (not completed), notify assignee
+        const creator = await userRepository.findById(userId);
+        const statusMessages: Record<string, string> = {
+          'To Do': `📝 ${creator?.name} moved "${existingTask.title}" back to To Do. Please review the requirements.`,
+          'In Progress': `🔄 ${creator?.name} moved "${existingTask.title}" to In Progress. Keep working on it!`,
+          'Review': `👀 ${creator?.name} moved "${existingTask.title}" to Review. Please check the feedback.`
+        };
+        
+        await notificationRepository.create({
+          userId: existingTask.assignedToId.toString(),
+          message: statusMessages[data.status] || `🔔 Task "${existingTask.title}" status updated to ${data.status}`,
+          taskId
+        });
       }
     }
 
