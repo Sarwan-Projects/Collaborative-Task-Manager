@@ -24,14 +24,14 @@ export default function Dashboard() {
   const acceptInvitation = useAcceptInvitation();
   const rejectInvitation = useRejectInvitation();
 
-  const handleSubmit = (formData: TaskInput) => {
+  const handleSubmit = (formData: TaskInput | Partial<TaskInput>) => {
     if (editingTask) {
       updateTask.mutate(
         { id: editingTask._id, data: formData },
         { onSuccess: () => { setIsModalOpen(false); setEditingTask(null); } }
       );
     } else {
-      createTask.mutate(formData, {
+      createTask.mutate(formData as TaskInput, {
         onSuccess: () => { setIsModalOpen(false); }
       });
     }
