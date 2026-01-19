@@ -19,17 +19,22 @@ export default function Login() {
     handleSubmit,
     formState: { errors }
   } = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema)
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: ''
+    }
   });
 
   const onSubmit = async (data: LoginInput) => {
     setIsLoading(true);
     try {
       await login(data.email, data.password);
-      toast.success('Welcome back!');
+      toast.success('✓ Welcome back! Redirecting to your dashboard...');
       navigate('/dashboard');
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Login failed');
+      const errorMessage = error.response?.data?.error || 'Unable to sign in. Please check your credentials.';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -41,21 +46,22 @@ export default function Login() {
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md">
           <div className="text-center mb-10">
-            <Link to="/" className="inline-flex items-center gap-2 mb-8">
-              <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg shadow-indigo-500/30">
+            <Link to="/" className="inline-flex items-center gap-2 mb-8 group">
+              <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/50 transition-shadow">
                 <Zap className="w-8 h-8 text-white" />
               </div>
             </Link>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
-            <p className="text-gray-500">Sign in to continue to TaskFlow</p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+            <p className="text-gray-600">Sign in to access your workspace</p>
           </div>
 
           <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-8">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <Input
                 type="email"
-                label="Email"
-                placeholder="you@example.com"
+                label="Email Address"
+                placeholder="Enter your email"
+                autoComplete="email"
                 error={errors.email?.message}
                 icon={<Mail className="w-5 h-5" />}
                 {...register('email')}
@@ -64,58 +70,90 @@ export default function Login() {
               <Input
                 type="password"
                 label="Password"
-                placeholder="••••••••"
+                placeholder="Enter your password"
+                autoComplete="current-password"
                 error={errors.password?.message}
                 icon={<Lock className="w-5 h-5" />}
                 {...register('password')}
               />
 
               <Button type="submit" variant="gradient" className="w-full" size="lg" isLoading={isLoading}>
-                Sign In
-                <ArrowRight className="w-4 h-4 ml-2" />
+                {isLoading ? 'Signing In...' : 'Sign In'}
+                {!isLoading && <ArrowRight className="w-4 h-4 ml-2" />}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <Link to="/register" className="text-indigo-600 hover:text-indigo-700 font-semibold">
-                  Create one
+                <Link to="/register" className="text-indigo-600 hover:text-indigo-700 font-semibold transition-colors">
+                  Create Account
                 </Link>
               </p>
             </div>
           </div>
 
-          <p className="text-center text-xs text-gray-400 mt-8">
-            By signing in, you agree to our Terms of Service and Privacy Policy
+          <p className="text-center text-xs text-gray-500 mt-8 px-4">
+            Protected by enterprise-grade security. Your data is encrypted and secure.
           </p>
         </div>
       </div>
 
       {/* Right side - Decorative */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 items-center justify-center p-12">
-        <div className="max-w-lg text-white">
-          <h2 className="text-4xl font-bold mb-6">
-            Manage your tasks with ease
+      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 items-center justify-center p-12 relative overflow-hidden">
+        {/* Animated background blobs */}
+        <div className="absolute top-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-blob" />
+        <div className="absolute bottom-20 right-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-blob animation-delay-2000" />
+        
+        <div className="max-w-lg text-white relative z-10">
+          <h2 className="text-4xl font-bold mb-6 leading-tight">
+            Streamline Your Workflow
           </h2>
-          <p className="text-lg text-white/80 mb-8">
-            TaskFlow helps you organize, track, and collaborate on tasks in real-time. 
-            Stay productive and never miss a deadline.
+          <p className="text-lg text-white/90 mb-8 leading-relaxed">
+            TaskFlow empowers teams to collaborate seamlessly with real-time updates, 
+            smart notifications, and intuitive task management. Stay organized and achieve more.
           </p>
-          <div className="flex items-center gap-4">
+          <div className="space-y-4 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <span className="text-white/90">Real-time collaboration</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <span className="text-white/90">Smart task assignments</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <span className="text-white/90">Advanced analytics</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-4 pt-6 border-t border-white/20">
             <div className="flex -space-x-3">
               {['A', 'B', 'C', 'D'].map((letter, i) => (
                 <div 
                   key={i}
-                  className="w-10 h-10 rounded-full bg-white/20 backdrop-blur border-2 border-white/30 flex items-center justify-center text-sm font-semibold"
+                  className="w-10 h-10 rounded-full bg-white/20 backdrop-blur border-2 border-white/40 flex items-center justify-center text-sm font-semibold shadow-lg"
                 >
                   {letter}
                 </div>
               ))}
             </div>
-            <p className="text-sm text-white/80">
-              Join 10,000+ users managing their tasks
-            </p>
+            <div>
+              <p className="text-sm font-semibold text-white">Trusted by teams worldwide</p>
+              <p className="text-xs text-white/70">Join thousands of productive users</p>
+            </div>
           </div>
         </div>
       </div>

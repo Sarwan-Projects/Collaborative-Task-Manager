@@ -10,7 +10,7 @@ import Button from '../ui/Button';
 
 interface TaskFormProps {
   task?: Task;
-  onSubmit: (data: TaskInput) => void;
+  onSubmit: (data: TaskInput | Partial<TaskInput>) => void;
   onCancel: () => void;
   isLoading?: boolean;
 }

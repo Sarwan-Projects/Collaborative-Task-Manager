@@ -83,7 +83,8 @@ export function useCreateTask() {
       if (context?.previousDashboard) {
         queryClient.setQueryData(['dashboard'], context.previousDashboard);
       }
-      toast.error(error.response?.data?.error || 'Failed to create task');
+      const errorMessage = error.response?.data?.error || 'Unable to create task. Please try again.';
+      toast.error(errorMessage);
     }
   });
 }
@@ -137,7 +138,8 @@ export function useUpdateTask() {
       if (context?.previousDashboard) {
         queryClient.setQueryData(['dashboard'], context.previousDashboard);
       }
-      toast.error(error.response?.data?.error || 'Failed to update task');
+      const errorMessage = error.response?.data?.error || 'Unable to update task. Please try again.';
+      toast.error(errorMessage);
     }
   });
 }
@@ -181,7 +183,8 @@ export function useDeleteTask() {
       if (context?.previousDashboard) {
         queryClient.setQueryData(['dashboard'], context.previousDashboard);
       }
-      toast.error(error.response?.data?.error || 'Failed to delete task');
+      const errorMessage = error.response?.data?.error || 'Unable to delete task. Please try again.';
+      toast.error(errorMessage);
     }
   });
 }
