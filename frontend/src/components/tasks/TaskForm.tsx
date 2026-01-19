@@ -30,6 +30,9 @@ export default function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFo
     ? (typeof task.assignedToId === 'string' ? task.assignedToId : (task.assignedToId as any)._id || (task.assignedToId as any).id)
     : null;
   
+  // Use pending invitation user if no assignee yet
+  const effectiveAssigneeId = assigneeId || task?.pendingInvitationUserId || '';
+  
   const isCreator = creatorId === currentUserId;
   const isAssignee = assigneeId === currentUserId;
   
@@ -48,7 +51,7 @@ export default function TaskForm({ task, onSubmit, onCancel, isLoading }: TaskFo
       dueDate: task?.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
       priority: task?.priority || Priority.MEDIUM,
       status: task?.status || Status.TODO,
-      assignedToId: (task?.assignedToId as any)?._id || (task?.assignedToId as any)?.id || (task?.assignedToId as string) || ''
+      assignedToId: effectiveAssigneeId
     }
   });
 

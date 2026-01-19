@@ -52,6 +52,24 @@ export class TaskController {
     try {
       const tasks = await taskService.getTasks(req.query as any, req.user!.id);
 
+      // Get all pending invitations for these tasks
+      const { taskInvitationRepository } = await import('../repositories/taskInvitation.repository');
+      const taskIds = tasks.map(t => t._id.toString());
+      const pendingInvitations = await Promise.all(
+        taskIds.map(id => taskInvitationRepository.findByTask(id))
+      );
+      
+      // Create a map of taskId -> pendingUserId
+      const invitationMap = new Map();
+      pendingInvitations.forEach((inv, index) => {
+        if (inv) {
+          const userId = typeof inv.toUserId === 'string' 
+            ? inv.toUserId 
+            : inv.toUserId._id.toString();
+          invitationMap.set(taskIds[index], userId);
+        }
+      });
+
       // Transform tasks to ensure consistent ID format
       const transformedTasks = tasks.map(task => ({
         ...task.toObject(),
@@ -64,7 +82,8 @@ export class TaskController {
           id: (task.assignedToId as any)._id.toString(),
           name: (task.assignedToId as any).name,
           email: (task.assignedToId as any).email
-        } : task.assignedToId
+        } : task.assignedToId,
+        pendingInvitationUserId: invitationMap.get(task._id.toString()) || null
       }));
 
       res.status(200).json({
@@ -85,6 +104,10 @@ export class TaskController {
     try {
       const task = await taskService.getTask(req.params.id);
 
+      // Check for pending invitation
+      const { taskInvitationRepository } = await import('../repositories/taskInvitation.repository');
+      const pendingInvitation = await taskInvitationRepository.findByTask(req.params.id);
+
       // Transform task to ensure consistent ID format
       const transformedTask = {
         ...task.toObject(),
@@ -97,7 +120,13 @@ export class TaskController {
           id: (task.assignedToId as any)._id.toString(),
           name: (task.assignedToId as any).name,
           email: (task.assignedToId as any).email
-        } : task.assignedToId
+        } : task.assignedToId,
+        // Add pending invitation user if exists
+        pendingInvitationUserId: pendingInvitation 
+          ? (typeof pendingInvitation.toUserId === 'string' 
+            ? pendingInvitation.toUserId 
+            : pendingInvitation.toUserId._id.toString())
+          : null
       };
 
       res.status(200).json({

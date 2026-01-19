@@ -189,6 +189,9 @@ export class TaskService {
 
         // If reassigning to self, update directly
         if (newAssignee === userId) {
+          // Delete any pending invitations for this task
+          await taskInvitationRepository.deleteByTask(taskId);
+          
           await auditLogRepository.create({
             taskId,
             userId,
@@ -197,15 +200,37 @@ export class TaskService {
             newValue: 'Self'
           });
         } else {
-          // Create invitation for new assignee (no notification - invitation is enough)
-          await taskInvitationRepository.create({
-            taskId,
-            fromUserId: userId,
-            toUserId: newAssignee
-          });
-
-          // Don't update assignedToId yet - wait for acceptance
-          delete data.assignedToId;
+          // Check if there's already a pending invitation for this task
+          const existingInvitation = await taskInvitationRepository.findByTask(taskId);
+          
+          if (existingInvitation) {
+            // If invitation exists and is for the same user, don't create a new one
+            const existingToUserId = typeof existingInvitation.toUserId === 'string'
+              ? existingInvitation.toUserId
+              : existingInvitation.toUserId._id.toString();
+            
+            if (existingToUserId === newAssignee) {
+              // Same user, just keep the existing invitation
+              delete data.assignedToId;
+            } else {
+              // Different user, delete old invitation and create new one
+              await taskInvitationRepository.deleteByTask(taskId);
+              await taskInvitationRepository.create({
+                taskId,
+                fromUserId: userId,
+                toUserId: newAssignee
+              });
+              delete data.assignedToId;
+            }
+          } else {
+            // No existing invitation, create new one
+            await taskInvitationRepository.create({
+              taskId,
+              fromUserId: userId,
+              toUserId: newAssignee
+            });
+            delete data.assignedToId;
+          }
 
           await auditLogRepository.create({
             taskId,

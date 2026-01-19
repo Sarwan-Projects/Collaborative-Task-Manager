@@ -28,6 +28,7 @@ export interface Task {
   status: Status;
   creatorId: User | string;
   assignedToId?: User | string | null;
+  pendingInvitationUserId?: string | null;
   createdAt: string;
   updatedAt: string;
 }
