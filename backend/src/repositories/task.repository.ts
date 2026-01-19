@@ -92,12 +92,13 @@ export class TaskRepository {
 
   /**
    * Get tasks assigned to a specific user
+   * Sorted by most recent first
    */
   async findByAssignee(userId: string): Promise<ITaskDocument[]> {
     return Task.find({ assignedToId: userId })
       .populate('creatorId', 'name email')
       .populate('assignedToId', 'name email')
-      .sort({ dueDate: 1 });
+      .sort({ createdAt: -1 });
   }
 
   /**

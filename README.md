@@ -23,6 +23,8 @@ A production-ready, full-stack task management application with real-time collab
 - **Real-Time Synchronization** - Live updates across all users via Socket.io with optimistic UI updates
 - **Pending Invitation Tracking** - Shows correct assignee in forms even before invitation acceptance
 - **Task Reassignment** - Creators can reassign tasks; new invitations sent automatically
+- **Smart Sorting** - Most recent tasks and invitations appear first; pending invitations prioritized over accepted tasks
+- **Scrollable Task Lists** - Smooth scrolling containers prevent page overflow with custom gradient scrollbars
 
 ### Notifications & Collaboration
 - **Contextual Notifications** - Smart, professional messages with emojis:
@@ -32,7 +34,8 @@ A production-ready, full-stack task management application with real-time collab
   - 👀 Task submitted for review
   - 📝 Task needs revision
   - ✅ Task completed
-- **Separate Invitation Display** - Pending invitations shown separately from notifications
+- **Clickable Notifications** - Click to navigate directly to tasks page for quick access
+- **Separate Invitation Display** - Pending invitations shown separately from notifications with dedicated section
 - **Review Workflow** - Assignees submit for review, creators approve or request changes
 - **No Duplicate Notifications** - Smart filtering prevents duplicate messages
 - **Auto-Cleanup** - Notifications deleted when tasks are completed
@@ -48,7 +51,7 @@ A production-ready, full-stack task management application with real-time collab
 
 ### User Experience
 - **Professional UI/UX** - Expert-level design with smooth animations and transitions
-- **Fully Responsive** - Mobile-first design optimized for phone, tablet, and desktop
+- **Fully Responsive** - Mobile-first design optimized for phone, tablet, and desktop with adaptive layouts
 - **Visual Task Cards** - Shows "Creator → Assignee" relationship with colored badges
 - **Advanced Filtering** - Filter by status, priority, assignee; search by title/description
 - **Keyboard Shortcuts** - Quick actions (N: new task, G: toggle view, ?: help, ESC: close)
@@ -57,6 +60,8 @@ A production-ready, full-stack task management application with real-time collab
 - **Toast Notifications** - Professional, single-message feedback system
 - **Form Validation** - Real-time validation with clear error messages
 - **Animated Backgrounds** - Gradient blobs on auth pages for visual appeal
+- **Custom Scrollbars** - Gradient-styled scrollbars with smooth hover effects
+- **Optimized Performance** - React Query caching, optimistic updates, and efficient re-renders
 
 ---
 

@@ -174,8 +174,12 @@ export class TaskService {
         await notificationRepository.deleteByTask(taskId);
         await taskInvitationRepository.deleteByTask(taskId);
         
-        // Return the task before deletion for the response
-        const deletedTask = { ...existingTask.toObject(), status: 'Completed' };
+        // Return the task with completed status (already a plain object)
+        const deletedTask = {
+          ...existingTask,
+          _id: existingTask._id,
+          status: 'Completed' as any
+        };
         return { task: deletedTask as any, changes };
       } else if (data.status === 'Review') {
         // Assignee moved to review, notify creator

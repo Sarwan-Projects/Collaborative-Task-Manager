@@ -169,9 +169,9 @@ export default function Dashboard() {
               {data?.assignedToMe?.length || 0}
             </span>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
             {data?.assignedToMe?.length ? (
-              data.assignedToMe.slice(0, 5).map((task) => (
+              data.assignedToMe.map((task) => (
                 <TaskCard
                   key={task._id}
                   task={task}
@@ -199,9 +199,9 @@ export default function Dashboard() {
               </span>
             )}
           </div>
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
             {data?.overdue?.length ? (
-              data.overdue.slice(0, 5).map((task) => (
+              data.overdue.map((task) => (
                 <TaskCard
                   key={task._id}
                   task={task}

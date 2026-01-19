@@ -165,16 +165,25 @@ export default function Navbar() {
                     notifData.notifications.slice(0, 10).map((notif) => (
                       <div
                         key={notif._id}
-                        className={`group px-4 py-3 hover:bg-gray-50 transition-colors relative ${
+                        className={`group px-4 py-3 hover:bg-gray-50 transition-colors relative cursor-pointer ${
                           !notif.read ? 'bg-indigo-50/50 border-l-2 border-indigo-500' : ''
                         }`}
+                        onClick={() => {
+                          if (notif.taskId) {
+                            navigate('/tasks');
+                            setIsNotifOpen(false);
+                          }
+                        }}
                       >
                         <p className="text-sm text-gray-800 pr-6">{notif.message}</p>
                         <p className="text-xs text-gray-400 mt-1">
                           {new Date(notif.createdAt).toLocaleDateString()}
                         </p>
                         <button
-                          onClick={() => deleteNotification.mutate(notif._id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteNotification.mutate(notif._id);
+                          }}
                           className="absolute top-3 right-3 p-1 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all"
                           title="Delete notification"
                         >
