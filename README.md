@@ -16,36 +16,47 @@ A production-ready, full-stack task management application with real-time collab
 ## ✨ Key Features
 
 ### Task Management
-- **Two-Way Consent System** - Task assignments require acceptance from assignees
-- **Role-Based Permissions** - Creators have full control, assignees can update status only
+- **Two-Way Consent System** - Task assignments require acceptance from assignees, ensuring mutual agreement
+- **Role-Based Permissions** - Creators have full control, assignees can update status only, others have read-only access
 - **Smart Status Workflow** - Assignees can mark tasks as "To Do", "In Progress", or "Review"; only creators can mark as "Completed"
-- **Auto-Cleanup** - Completed tasks are automatically archived and removed from active views
-- **Real-Time Updates** - Live synchronization across all users via Socket.io
+- **Auto-Cleanup on Completion** - Completed tasks are automatically archived and removed from database for workspace cleanliness
+- **Real-Time Synchronization** - Live updates across all users via Socket.io with optimistic UI updates
+- **Pending Invitation Tracking** - Shows correct assignee in forms even before invitation acceptance
+- **Task Reassignment** - Creators can reassign tasks; new invitations sent automatically
 
 ### Notifications & Collaboration
-- **Contextual Notifications** - Smart messages with emojis for different actions:
+- **Contextual Notifications** - Smart, professional messages with emojis:
   - 📋 Task invitation sent
   - ✅ Invitation accepted
-  - ❌ Invitation declined
+  - ❌ Invitation declined  
   - 👀 Task submitted for review
   - 📝 Task needs revision
   - ✅ Task completed
-- **Task Invitations** - Pending invitations displayed separately from notifications
+- **Separate Invitation Display** - Pending invitations shown separately from notifications
 - **Review Workflow** - Assignees submit for review, creators approve or request changes
+- **No Duplicate Notifications** - Smart filtering prevents duplicate messages
+- **Auto-Cleanup** - Notifications deleted when tasks are completed
 
 ### Security & Performance
-- **JWT Authentication** - Secure token-based auth with HttpOnly cookies
-- **Auto-Logout** - Validates user existence on app mount, clears localStorage if deleted
-- **Rate Limiting** - 100 requests per 15 minutes per IP
-- **Optimistic Updates** - Instant UI feedback using React Query
-- **Permission Enforcement** - Backend validates all operations
+- **JWT Authentication** - Secure token-based auth with HttpOnly cookies and Authorization header fallback
+- **Auto-Logout on User Deletion** - Validates user existence on app mount, clears localStorage if deleted
+- **Rate Limiting** - 100 requests per 15 minutes per IP to prevent abuse
+- **Optimistic Updates** - Instant UI feedback using React Query with automatic rollback on errors
+- **Permission Enforcement** - Backend validates all operations; assignees restricted to status updates only
+- **Input Validation** - Strict validation for creation, lenient for updates (Zod schemas)
+- **CORS Protection** - Restricts cross-origin requests to authorized domains
 
 ### User Experience
-- **Responsive Design** - Mobile-first UI with Tailwind CSS
-- **Visual Task Cards** - Shows "Creator → Assignee" relationship
-- **Advanced Filtering** - Filter by status, priority, assignee, and search
-- **Keyboard Shortcuts** - Quick actions (N: new task, G: toggle view, ?: help)
-- **Smart Dropdowns** - Auto-fills assigned users, hides irrelevant options
+- **Professional UI/UX** - Expert-level design with smooth animations and transitions
+- **Fully Responsive** - Mobile-first design optimized for phone, tablet, and desktop
+- **Visual Task Cards** - Shows "Creator → Assignee" relationship with colored badges
+- **Advanced Filtering** - Filter by status, priority, assignee; search by title/description
+- **Keyboard Shortcuts** - Quick actions (N: new task, G: toggle view, ?: help, ESC: close)
+- **Smart Dropdowns** - Auto-fills assigned users, hides irrelevant options based on context
+- **Loading States** - Skeleton loaders and descriptive loading text
+- **Toast Notifications** - Professional, single-message feedback system
+- **Form Validation** - Real-time validation with clear error messages
+- **Animated Backgrounds** - Gradient blobs on auth pages for visual appeal
 
 ---
 
@@ -151,26 +162,30 @@ docker-compose up -d
 ## 🎯 Key Design Decisions
 
 ### Two-Way Consent System
-Tasks create invitations instead of direct assignments. Users must accept before becoming assignees, ensuring mutual agreement and preventing unwanted task assignments.
+Tasks create invitations instead of direct assignments. Users must accept before becoming assignees, ensuring mutual agreement and preventing unwanted task assignments. Rejected invitations are automatically hidden from the UI.
 
 ### Role-Based Status Control
-- **Assignees**: Can update status to "To Do", "In Progress", or "Review"
-- **Creators**: Full control including marking as "Completed"
-- **Others**: Read-only access
+- **Assignees**: Can update status to "To Do", "In Progress", or "Review" only
+- **Creators**: Full control including marking as "Completed" and editing all fields
+- **Others**: Read-only access to all tasks
 
-This prevents assignees from prematurely closing tasks and ensures creators verify completion.
+This prevents assignees from prematurely closing tasks and ensures creators verify completion before archival.
 
 ### Smart Notification System
-- No duplicate notifications (invitations shown separately)
-- Contextual messages based on action type
-- Auto-cleanup when tasks are completed
-- Only relevant parties receive notifications
+- No duplicate notifications (invitations shown separately in dedicated section)
+- Contextual messages based on action type with appropriate emojis
+- Auto-cleanup when tasks are completed to reduce clutter
+- Only relevant parties receive notifications (no spam)
+- Socket notifications only show for other users (not the person making the change)
 
 ### Auto-Cleanup on Completion
-Completed tasks are automatically removed from database and UI, keeping the workspace clean and focused on active work.
+Completed tasks are automatically removed from database and UI, keeping the workspace clean and focused on active work. This prevents database bloat and maintains performance.
 
 ### Pending Invitation Tracking
-Tasks store `pendingInvitationUserId` to show correct assignee in edit forms even before acceptance, preventing confusion about task ownership.
+Tasks store `pendingInvitationUserId` to show correct assignee in edit forms even before acceptance, preventing confusion about task ownership. Both creator and pending assignee see the same user in dropdowns.
+
+### Lenient Update Validation
+Backend uses strict validation for task creation but lenient validation for updates, allowing partial updates (like status-only changes) without validation errors. This enables the role-based permission system to work smoothly.
 
 ---
 
@@ -188,13 +203,20 @@ Tasks store `pendingInvitationUserId` to show correct assignee in edit forms eve
 
 ## 🎨 UI/UX Highlights
 
-- **Responsive Design** - Works on all devices
-- **Visual Hierarchy** - Creator → Assignee badges on cards
-- **Smart Forms** - Context-aware field enabling/disabling
-- **Toast Notifications** - Single, clear feedback messages
-- **Loading States** - Skeleton loaders for better UX
-- **Keyboard Shortcuts** - Power user efficiency
-- **Color-Coded Urgency** - Visual warnings for due dates
+- **Professional Design** - Expert-level UI with polished animations and transitions
+- **Fully Responsive** - Optimized for mobile (320px+), tablet (768px+), and desktop (1024px+)
+- **Visual Hierarchy** - Creator → Assignee badges with color-coded user avatars
+- **Smart Forms** - Context-aware field enabling/disabling based on user role
+- **Toast Notifications** - Professional, single-message feedback (no duplicates)
+- **Loading States** - Skeleton loaders and descriptive loading text ("Signing In...", "Creating Account...")
+- **Keyboard Shortcuts** - Power user efficiency with intuitive shortcuts
+- **Color-Coded Urgency** - Visual warnings for overdue and due-soon tasks
+- **Animated Auth Pages** - Gradient backgrounds with floating blobs for visual appeal
+- **Flip Effect** - Login and Register pages flip sides for dynamic transition
+- **Autocomplete Support** - Proper autocomplete attributes for better browser integration
+- **Error Handling** - Clear, actionable error messages without technical jargon
+- **Focus States** - Visible focus indicators for accessibility
+- **Hover Effects** - Smooth transitions on interactive elements
 
 ---
 
