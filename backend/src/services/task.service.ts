@@ -154,13 +154,19 @@ export class TaskService {
         }
 
         // Notify assignee that task is completed
-        if (existingTask.assignedToId && existingTask.assignedToId.toString() !== userId) {
-          const creator = await userRepository.findById(userId);
-          await notificationRepository.create({
-            userId: existingTask.assignedToId.toString(),
-            message: `✅ Your task "${existingTask.title}" has been marked as completed by ${creator?.name}!`,
-            taskId
-          });
+        if (existingTask.assignedToId) {
+          const assigneeIdString = typeof existingTask.assignedToId === 'string'
+            ? existingTask.assignedToId
+            : existingTask.assignedToId._id.toString();
+          
+          if (assigneeIdString !== userId) {
+            const creator = await userRepository.findById(userId);
+            await notificationRepository.create({
+              userId: assigneeIdString,
+              message: `✅ Your task "${existingTask.title}" has been marked as completed by ${creator?.name}!`,
+              taskId
+            });
+          }
         }
         
         // Delete the task after marking as completed (cleanup)
@@ -173,28 +179,38 @@ export class TaskService {
         return { task: deletedTask as any, changes };
       } else if (data.status === 'Review') {
         // Assignee moved to review, notify creator
-        if (isAssignee && !isCreator && existingTask.creatorId.toString() !== userId) {
+        const creatorIdString = typeof existingTask.creatorId === 'string'
+          ? existingTask.creatorId
+          : existingTask.creatorId._id.toString();
+        
+        if (isAssignee && !isCreator && creatorIdString !== userId) {
           const assignee = await userRepository.findById(userId);
           await notificationRepository.create({
-            userId: existingTask.creatorId.toString(),
+            userId: creatorIdString,
             message: `👀 ${assignee?.name} has submitted "${existingTask.title}" for your review`,
             taskId
           });
         }
-      } else if (isCreator && existingTask.assignedToId && existingTask.assignedToId.toString() !== userId) {
-        // Creator changed status back (not completed), notify assignee
-        const creator = await userRepository.findById(userId);
-        const statusMessages: Record<string, string> = {
-          'To Do': `📝 ${creator?.name} moved "${existingTask.title}" back to To Do. Please review the requirements.`,
-          'In Progress': `🔄 ${creator?.name} moved "${existingTask.title}" to In Progress. Keep working on it!`,
-          'Review': `👀 ${creator?.name} moved "${existingTask.title}" to Review. Please check the feedback.`
-        };
+      } else if (isCreator && existingTask.assignedToId) {
+        const assigneeIdString = typeof existingTask.assignedToId === 'string'
+          ? existingTask.assignedToId
+          : existingTask.assignedToId._id.toString();
         
-        await notificationRepository.create({
-          userId: existingTask.assignedToId.toString(),
-          message: statusMessages[data.status] || `🔔 Task "${existingTask.title}" status updated to ${data.status}`,
-          taskId
-        });
+        if (assigneeIdString !== userId) {
+          // Creator changed status back (not completed), notify assignee
+          const creator = await userRepository.findById(userId);
+          const statusMessages: Record<string, string> = {
+            'To Do': `📝 ${creator?.name} moved "${existingTask.title}" back to To Do. Please review the requirements.`,
+            'In Progress': `🔄 ${creator?.name} moved "${existingTask.title}" to In Progress. Keep working on it!`,
+            'Review': `👀 ${creator?.name} moved "${existingTask.title}" to Review. Please check the feedback.`
+          };
+          
+          await notificationRepository.create({
+            userId: assigneeIdString,
+            message: statusMessages[data.status] || `🔔 Task "${existingTask.title}" status updated to ${data.status}`,
+            taskId
+          });
+        }
       }
     }
 
