@@ -28,7 +28,16 @@ export default function Dashboard() {
     if (editingTask) {
       updateTask.mutate(
         { id: editingTask._id, data: formData },
-        { onSuccess: () => { setIsModalOpen(false); setEditingTask(null); } }
+        { 
+          onSuccess: (data) => { 
+            setIsModalOpen(false); 
+            setEditingTask(null);
+            // Show completion message if task was completed
+            if (data.status === 'Completed') {
+              // Modal already closed, task removed from UI via socket
+            }
+          } 
+        }
       );
     } else {
       createTask.mutate(formData as TaskInput, {

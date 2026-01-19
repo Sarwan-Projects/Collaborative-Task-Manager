@@ -150,36 +150,45 @@ export class TaskController {
         req.user!.id
       );
 
+      // Check if task was deleted (completed)
+      const isDeleted = (task as any).isDeleted;
+
       // Transform task to ensure consistent ID format
+      const taskObject = task.toObject ? task.toObject() : task;
       const transformedTask = {
-        ...task.toObject(),
-        creatorId: task.creatorId ? {
-          id: (task.creatorId as any)._id.toString(),
-          name: (task.creatorId as any).name,
-          email: (task.creatorId as any).email
-        } : task.creatorId,
-        assignedToId: task.assignedToId ? {
-          id: (task.assignedToId as any)._id.toString(),
-          name: (task.assignedToId as any).name,
-          email: (task.assignedToId as any).email
-        } : task.assignedToId
+        ...taskObject,
+        creatorId: taskObject.creatorId ? {
+          id: (taskObject.creatorId as any)._id?.toString() || (taskObject.creatorId as any).id,
+          name: (taskObject.creatorId as any).name,
+          email: (taskObject.creatorId as any).email
+        } : taskObject.creatorId,
+        assignedToId: taskObject.assignedToId ? {
+          id: (taskObject.assignedToId as any)._id?.toString() || (taskObject.assignedToId as any).id,
+          name: (taskObject.assignedToId as any).name,
+          email: (taskObject.assignedToId as any).email
+        } : taskObject.assignedToId
       };
 
-      // Emit real-time event with change details
-      getIO().emit('task:updated', { task: transformedTask, changes });
+      // If task was completed and deleted, emit delete event
+      if (isDeleted) {
+        getIO().emit('task:deleted', { taskId: req.params.id });
+      } else {
+        // Emit real-time event with change details
+        getIO().emit('task:updated', { task: transformedTask, changes });
 
-      // If assignee changed, emit specific notification event
-      if (changes.includes('assignee') && task.assignedToId) {
-        getIO().to(`user:${task.assignedToId}`).emit('notification:new', {
-          message: `You have been assigned to task: "${task.title}"`,
-          taskId: task._id
-        });
+        // If assignee changed, emit specific notification event
+        if (changes.includes('assignee') && taskObject.assignedToId) {
+          getIO().to(`user:${taskObject.assignedToId}`).emit('notification:new', {
+            message: `You have been assigned to task: "${taskObject.title}"`,
+            taskId: taskObject._id
+          });
+        }
       }
 
       res.status(200).json({
         success: true,
         data: transformedTask,
-        message: 'Task updated successfully'
+        message: isDeleted ? 'Task completed and archived successfully' : 'Task updated successfully'
       });
     } catch (error) {
       next(error);

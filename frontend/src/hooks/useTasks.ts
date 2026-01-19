@@ -121,11 +121,16 @@ export function useUpdateTask() {
 
       return { previousTasks, previousTask, previousDashboard };
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['task', variables.id] });
-      toast.success('✓ Task updated successfully');
+      
+      // Check if task was completed (deleted)
+      const message = data.status === 'Completed' 
+        ? '✅ Task completed and archived successfully'
+        : '✓ Task updated successfully';
+      toast.success(message);
     },
     onError: (error: any, _, context: any) => {
       // Rollback on error

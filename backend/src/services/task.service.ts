@@ -169,18 +169,22 @@ export class TaskService {
           }
         }
         
+        // Convert to plain object before deletion
+        const taskObject = existingTask.toObject ? existingTask.toObject() : existingTask;
+        
         // Delete the task after marking as completed (cleanup)
         await taskRepository.delete(taskId);
         await notificationRepository.deleteByTask(taskId);
         await taskInvitationRepository.deleteByTask(taskId);
         
-        // Return the task with completed status (already a plain object)
-        const deletedTask = {
-          ...existingTask,
-          _id: existingTask._id,
-          status: 'Completed' as any
+        // Return the task with completed status and isDeleted flag
+        const completedTask = {
+          ...taskObject,
+          _id: taskObject._id,
+          status: 'Completed' as any,
+          isDeleted: true
         };
-        return { task: deletedTask as any, changes };
+        return { task: completedTask as any, changes };
       } else if (data.status === 'Review') {
         // Assignee moved to review, notify creator
         const creatorIdString = typeof existingTask.creatorId === 'string'
