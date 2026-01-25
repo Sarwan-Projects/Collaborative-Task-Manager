@@ -35,19 +35,21 @@ export default function Login() {
   const emailValue = watch('email');
   const passwordValue = watch('password');
 
-  const onSubmit = async (data: LoginInput, e?: React.BaseSyntheticEvent) => {
-    e?.preventDefault();
-    e?.stopPropagation();
-    
+  const onSubmit = async (data: LoginInput) => {
+    console.log('onSubmit called with:', data); // Debug log
     setIsLoading(true);
     
     try {
+      console.log('Attempting login...'); // Debug log
       await login(data.email, data.password);
+      console.log('Login successful'); // Debug log
       toast.success('✓ Welcome back! Redirecting to your dashboard...', {
         duration: 3000,
       });
       navigate('/dashboard');
     } catch (error: any) {
+      console.log('Login error:', error); // Debug log
+      
       // Preserve form values after error
       setTimeout(() => {
         setValue('email', emailValue, { shouldValidate: false });
@@ -55,6 +57,7 @@ export default function Login() {
       }, 0);
       
       const errorMessage = error.response?.data?.error || 'Unable to sign in. Please check your credentials.';
+      console.log('Error message:', errorMessage); // Debug log
       
       // Show persistent error toast
       const toastId = toast.error(errorMessage, {
@@ -74,11 +77,14 @@ export default function Login() {
       });
       
       console.log('Toast ID:', toastId); // Debug log
-      
-      return false;
     } finally {
       setIsLoading(false);
+      console.log('Finally block executed'); // Debug log
     }
+  };
+
+  const onError = (errors: any) => {
+    console.log('Form validation errors:', errors); // Debug log
   };
 
   return (
@@ -97,7 +103,7 @@ export default function Login() {
           </div>
 
           <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-8">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+            <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-5" noValidate>
               <Input
                 type="email"
                 label="Email Address"
@@ -120,6 +126,33 @@ export default function Login() {
                 {isLoading ? 'Signing In...' : 'Sign In'}
                 {!isLoading && <ArrowRight className="w-4 h-4 ml-2" />}
               </Button>
+
+              {/* Debug button to test toast */}
+              <button
+                type="button"
+                onClick={() => {
+                  console.log('Test button clicked');
+                  const testToastId = toast.error('Test error message - this should stay forever!', {
+                    duration: Infinity,
+                    style: {
+                      background: '#FEE2E2',
+                      color: '#991B1B',
+                      border: '3px solid #DC2626',
+                      fontWeight: '700',
+                      fontSize: '16px',
+                      padding: '20px 24px',
+                      minWidth: '400px',
+                      maxWidth: '500px',
+                      boxShadow: '0 20px 50px rgba(220, 38, 38, 0.4)',
+                    },
+                    icon: '❌',
+                  });
+                  console.log('Test Toast ID:', testToastId);
+                }}
+                className="w-full px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-xl hover:bg-gray-50"
+              >
+                🧪 Test Toast (Debug)
+              </button>
             </form>
 
             <div className="mt-6 text-center">
