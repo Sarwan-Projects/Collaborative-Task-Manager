@@ -47,21 +47,25 @@ export default function Login() {
       const errorMessage = error.response?.data?.error || 'Unable to sign in. Please check your credentials.';
       console.log('Error message:', errorMessage); // Debug log
       
-      // Show persistent error toast
+      // Show beautiful error toast with auto-dismiss
       const toastId = toast.error(errorMessage, {
-        duration: Infinity,
+        duration: 8000, // 8 seconds - enough time to read
         style: {
-          background: '#FEE2E2',
+          background: 'linear-gradient(135deg, #FEE2E2 0%, #FEF2F2 100%)',
           color: '#991B1B',
-          border: '3px solid #DC2626',
-          fontWeight: '700',
-          fontSize: '16px',
-          padding: '20px 24px',
-          minWidth: '400px',
-          maxWidth: '500px',
-          boxShadow: '0 20px 50px rgba(220, 38, 38, 0.4)',
+          border: '2px solid #FCA5A5',
+          borderRadius: '16px',
+          fontWeight: '600',
+          fontSize: '15px',
+          padding: '16px 20px',
+          minWidth: '350px',
+          maxWidth: '450px',
+          boxShadow: '0 10px 40px rgba(239, 68, 68, 0.2), 0 0 0 1px rgba(239, 68, 68, 0.05)',
         },
-        icon: '❌',
+        iconTheme: {
+          primary: '#DC2626',
+          secondary: '#FEE2E2',
+        },
       });
       
       console.log('Toast ID:', toastId); // Debug log

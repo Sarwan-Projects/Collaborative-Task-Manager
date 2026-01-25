@@ -48,20 +48,25 @@ A production-ready, full-stack task management application with real-time collab
 - **Permission Enforcement** - Backend validates all operations; assignees restricted to status updates only
 - **Input Validation** - Strict validation for creation, lenient for updates (Zod schemas)
 - **CORS Protection** - Restricts cross-origin requests to authorized domains
+- **Smart Error Handling** - Axios interceptor prevents redirect loops on auth pages
+- **Database Cleanup** - Auto-delete completed tasks, notifications, invitations, and audit logs
+- **Form Persistence** - React Hook Form with shouldUnregister: false prevents data loss
 
 ### User Experience
 - **Professional UI/UX** - Expert-level design with smooth animations and transitions
 - **Fully Responsive** - Mobile-first design optimized for phone, tablet, and desktop with adaptive layouts
+- **Beautiful Toast Notifications** - Gradient-styled toasts with 8-second duration for errors, 4 seconds for success
+- **Password Visibility Toggle** - Eye icon to show/hide password with smooth transitions
 - **Visual Task Cards** - Shows "Creator → Assignee" relationship with colored badges
 - **Advanced Filtering** - Filter by status, priority, assignee; search by title/description
 - **Keyboard Shortcuts** - Quick actions (N: new task, G: toggle view, ?: help, ESC: close)
 - **Smart Dropdowns** - Auto-fills assigned users, hides irrelevant options based on context
 - **Loading States** - Skeleton loaders and descriptive loading text
-- **Toast Notifications** - Professional, single-message feedback system
 - **Form Validation** - Real-time validation with clear error messages
 - **Animated Backgrounds** - Gradient blobs on auth pages for visual appeal
 - **Custom Scrollbars** - Gradient-styled scrollbars with smooth hover effects
 - **Optimized Performance** - React Query caching, optimistic updates, and efficient re-renders
+- **Persistent Form Values** - Form data preserved on error for better UX
 
 ---
 
