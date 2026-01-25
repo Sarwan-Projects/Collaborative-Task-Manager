@@ -31,11 +31,24 @@ export default function Register() {
     setIsLoading(true);
     try {
       await registerUser(data.name, data.email, data.password);
-      toast.success('✓ Account created successfully! Welcome to TaskFlow.');
+      toast.success('✓ Account created successfully! Welcome to TaskFlow.', {
+        duration: 3000,
+      });
       navigate('/dashboard');
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Unable to create account. Please try again.';
-      toast.error(errorMessage);
+      toast.error(errorMessage, {
+        duration: 6000, // Show error for 6 seconds
+        style: {
+          background: '#FEE2E2',
+          color: '#991B1B',
+          border: '2px solid #FCA5A5',
+          fontWeight: '600',
+          fontSize: '14px',
+          padding: '16px',
+        },
+      });
+      // Don't reset form - keep the values so user can see what they entered
     } finally {
       setIsLoading(false);
     }

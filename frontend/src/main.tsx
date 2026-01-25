@@ -30,11 +30,19 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               toastOptions={{
                 duration: 4000,
                 error: {
-                  duration: 5000,
+                  duration: 6000, // Errors show for 6 seconds
                   style: {
                     background: '#FEE2E2',
                     color: '#991B1B',
-                    border: '1px solid #FCA5A5',
+                    border: '2px solid #FCA5A5',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    padding: '16px',
+                    minWidth: '300px',
+                  },
+                  iconTheme: {
+                    primary: '#DC2626',
+                    secondary: '#FEE2E2',
                   },
                 },
                 success: {
@@ -42,7 +50,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                   style: {
                     background: '#D1FAE5',
                     color: '#065F46',
-                    border: '1px solid #6EE7B7',
+                    border: '2px solid #6EE7B7',
+                    fontWeight: '600',
+                    fontSize: '14px',
+                    padding: '16px',
+                  },
+                  iconTheme: {
+                    primary: '#059669',
+                    secondary: '#D1FAE5',
                   },
                 },
               }}

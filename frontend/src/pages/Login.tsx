@@ -30,11 +30,24 @@ export default function Login() {
     setIsLoading(true);
     try {
       await login(data.email, data.password);
-      toast.success('✓ Welcome back! Redirecting to your dashboard...');
+      toast.success('✓ Welcome back! Redirecting to your dashboard...', {
+        duration: 3000,
+      });
       navigate('/dashboard');
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Unable to sign in. Please check your credentials.';
-      toast.error(errorMessage);
+      toast.error(errorMessage, {
+        duration: 6000, // Show error for 6 seconds
+        style: {
+          background: '#FEE2E2',
+          color: '#991B1B',
+          border: '2px solid #FCA5A5',
+          fontWeight: '600',
+          fontSize: '14px',
+          padding: '16px',
+        },
+      });
+      // Don't reset form - keep the values so user can see what they entered
     } finally {
       setIsLoading(false);
     }
