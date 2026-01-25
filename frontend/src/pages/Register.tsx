@@ -18,8 +18,6 @@ export default function Register() {
   const {
     register,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors }
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -31,11 +29,6 @@ export default function Register() {
     shouldUnregister: false,
     mode: 'onSubmit',
   });
-
-  // Watch form values to preserve them
-  const nameValue = watch('name');
-  const emailValue = watch('email');
-  const passwordValue = watch('password');
 
   const onSubmit = async (data: RegisterInput) => {
     console.log('onSubmit called with:', data); // Debug log
@@ -51,13 +44,6 @@ export default function Register() {
       navigate('/dashboard');
     } catch (error: any) {
       console.log('Registration error:', error); // Debug log
-      
-      // Preserve form values after error
-      setTimeout(() => {
-        setValue('name', nameValue, { shouldValidate: false });
-        setValue('email', emailValue, { shouldValidate: false });
-        setValue('password', passwordValue, { shouldValidate: false });
-      }, 0);
       
       const errorMessage = error.response?.data?.error || 'Unable to create account. Please try again.';
       console.log('Error message:', errorMessage); // Debug log
@@ -80,6 +66,7 @@ export default function Register() {
       });
       
       console.log('Toast ID:', toastId); // Debug log
+      console.log('NOT calling setValue - form should keep values automatically');
     } finally {
       setIsLoading(false);
       console.log('Finally block executed'); // Debug log

@@ -18,8 +18,6 @@ export default function Login() {
   const {
     register,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors }
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -30,10 +28,6 @@ export default function Login() {
     shouldUnregister: false,
     mode: 'onSubmit',
   });
-
-  // Watch form values to preserve them
-  const emailValue = watch('email');
-  const passwordValue = watch('password');
 
   const onSubmit = async (data: LoginInput) => {
     console.log('onSubmit called with:', data); // Debug log
@@ -49,12 +43,6 @@ export default function Login() {
       navigate('/dashboard');
     } catch (error: any) {
       console.log('Login error:', error); // Debug log
-      
-      // Preserve form values after error
-      setTimeout(() => {
-        setValue('email', emailValue, { shouldValidate: false });
-        setValue('password', passwordValue, { shouldValidate: false });
-      }, 0);
       
       const errorMessage = error.response?.data?.error || 'Unable to sign in. Please check your credentials.';
       console.log('Error message:', errorMessage); // Debug log
@@ -77,6 +65,7 @@ export default function Login() {
       });
       
       console.log('Toast ID:', toastId); // Debug log
+      console.log('NOT calling setValue - form should keep values automatically');
     } finally {
       setIsLoading(false);
       console.log('Finally block executed'); // Debug log
