@@ -37,19 +37,21 @@ export default function Register() {
   const emailValue = watch('email');
   const passwordValue = watch('password');
 
-  const onSubmit = async (data: RegisterInput, e?: React.BaseSyntheticEvent) => {
-    e?.preventDefault();
-    e?.stopPropagation();
-    
+  const onSubmit = async (data: RegisterInput) => {
+    console.log('onSubmit called with:', data); // Debug log
     setIsLoading(true);
     
     try {
+      console.log('Attempting registration...'); // Debug log
       await registerUser(data.name, data.email, data.password);
+      console.log('Registration successful'); // Debug log
       toast.success('✓ Account created successfully! Welcome to TaskFlow.', {
         duration: 3000,
       });
       navigate('/dashboard');
     } catch (error: any) {
+      console.log('Registration error:', error); // Debug log
+      
       // Preserve form values after error
       setTimeout(() => {
         setValue('name', nameValue, { shouldValidate: false });
@@ -58,6 +60,7 @@ export default function Register() {
       }, 0);
       
       const errorMessage = error.response?.data?.error || 'Unable to create account. Please try again.';
+      console.log('Error message:', errorMessage); // Debug log
       
       // Show persistent error toast
       const toastId = toast.error(errorMessage, {
@@ -77,11 +80,14 @@ export default function Register() {
       });
       
       console.log('Toast ID:', toastId); // Debug log
-      
-      return false;
     } finally {
       setIsLoading(false);
+      console.log('Finally block executed'); // Debug log
     }
+  };
+
+  const onError = (errors: any) => {
+    console.log('Form validation errors:', errors); // Debug log
   };
 
   const features = [
@@ -152,7 +158,16 @@ export default function Register() {
           </div>
 
           <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-8">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Form onSubmit triggered');
+                handleSubmit(onSubmit, onError)(e);
+              }} 
+              className="space-y-5" 
+              noValidate
+            >
               <Input
                 label="Full Name"
                 placeholder="Enter your full name"

@@ -103,7 +103,16 @@ export default function Login() {
           </div>
 
           <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-8">
-            <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-5" noValidate>
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Form onSubmit triggered');
+                handleSubmit(onSubmit, onError)(e);
+              }} 
+              className="space-y-5" 
+              noValidate
+            >
               <Input
                 type="email"
                 label="Email Address"
@@ -122,7 +131,16 @@ export default function Login() {
                 {...register('password')}
               />
 
-              <Button type="submit" variant="gradient" className="w-full" size="lg" isLoading={isLoading}>
+              <Button 
+                type="submit" 
+                variant="gradient" 
+                className="w-full" 
+                size="lg" 
+                isLoading={isLoading}
+                onClick={() => {
+                  console.log('Button clicked');
+                }}
+              >
                 {isLoading ? 'Signing In...' : 'Sign In'}
                 {!isLoading && <ArrowRight className="w-4 h-4 ml-2" />}
               </Button>
