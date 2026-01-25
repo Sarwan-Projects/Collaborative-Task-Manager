@@ -29,7 +29,8 @@ export default function Login() {
     mode: 'onSubmit',
   });
 
-  const onSubmit = async (data: LoginInput) => {
+  const onSubmit = async (data: LoginInput, e?: React.BaseSyntheticEvent) => {
+    e?.preventDefault(); // Explicitly prevent default form submission
     setIsLoading(true);
     
     // Store values before potential error
@@ -45,9 +46,9 @@ export default function Login() {
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Unable to sign in. Please check your credentials.';
       
-      // Show error toast with very long duration
+      // Show error toast that stays until dismissed
       toast.error(errorMessage, {
-        duration: Infinity, // Toast stays until manually dismissed
+        duration: Infinity,
         style: {
           background: '#FEE2E2',
           color: '#991B1B',
@@ -61,6 +62,9 @@ export default function Login() {
         },
         icon: '❌',
       });
+      
+      // Don't reset form on error - keep values
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -82,7 +86,7 @@ export default function Login() {
           </div>
 
           <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-8">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
               <Input
                 type="email"
                 label="Email Address"
