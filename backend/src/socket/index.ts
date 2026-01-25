@@ -3,6 +3,7 @@ import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { config } from '../config';
 import { JwtPayload } from '../types';
+import logger from '../utils/logger';
 
 let io: Server;
 
@@ -44,7 +45,7 @@ export const initializeSocket = (httpServer: HttpServer): Server => {
   });
 
   io.on('connection', (socket: Socket) => {
-    console.log(`✅ User connected: ${socket.data.userId}`);
+    logger.info(`✅ User connected: ${socket.data.userId}`);
 
     // Join user-specific room for targeted notifications
     socket.join(`user:${socket.data.userId}`);
@@ -52,18 +53,18 @@ export const initializeSocket = (httpServer: HttpServer): Server => {
     // Handle joining task-specific rooms (for viewing task details)
     socket.on('task:join', (taskId: string) => {
       socket.join(`task:${taskId}`);
-      console.log(`User ${socket.data.userId} joined task room: ${taskId}`);
+      logger.debug(`User ${socket.data.userId} joined task room: ${taskId}`);
     });
 
     // Handle leaving task rooms
     socket.on('task:leave', (taskId: string) => {
       socket.leave(`task:${taskId}`);
-      console.log(`User ${socket.data.userId} left task room: ${taskId}`);
+      logger.debug(`User ${socket.data.userId} left task room: ${taskId}`);
     });
 
     // Handle disconnect
     socket.on('disconnect', () => {
-      console.log(`❌ User disconnected: ${socket.data.userId}`);
+      logger.info(`❌ User disconnected: ${socket.data.userId}`);
     });
   });
 

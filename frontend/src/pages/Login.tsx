@@ -30,22 +30,16 @@ export default function Login() {
   });
 
   const onSubmit = async (data: LoginInput) => {
-    console.log('onSubmit called with:', data); // Debug log
     setIsLoading(true);
     
     try {
-      console.log('Attempting login...'); // Debug log
       await login(data.email, data.password);
-      console.log('Login successful'); // Debug log
       toast.success('✓ Welcome back! Redirecting to your dashboard...', {
         duration: 3000,
       });
       navigate('/dashboard');
     } catch (error: any) {
-      console.log('Login error:', error); // Debug log
-      
       const errorMessage = error.response?.data?.error || 'Unable to sign in. Please check your credentials.';
-      console.log('Error message:', errorMessage); // Debug log
       
       // Show beautiful error toast with 5 second duration
       toast.error(errorMessage, {
@@ -61,15 +55,13 @@ export default function Login() {
           boxShadow: '0 8px 32px rgba(239, 68, 68, 0.15)',
         },
       });
-      console.log('NOT calling setValue - form should keep values automatically');
     } finally {
       setIsLoading(false);
-      console.log('Finally block executed'); // Debug log
     }
   };
 
   const onError = (errors: any) => {
-    console.log('Form validation errors:', errors); // Debug log
+    // Form validation errors handled by react-hook-form
   };
 
   return (
@@ -92,7 +84,6 @@ export default function Login() {
               onSubmit={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Form onSubmit triggered');
                 handleSubmit(onSubmit, onError)(e);
               }} 
               className="space-y-5" 
@@ -122,9 +113,6 @@ export default function Login() {
                 className="w-full" 
                 size="lg" 
                 isLoading={isLoading}
-                onClick={() => {
-                  console.log('Button clicked');
-                }}
               >
                 {isLoading ? 'Signing In...' : 'Sign In'}
                 {!isLoading && <ArrowRight className="w-4 h-4 ml-2" />}

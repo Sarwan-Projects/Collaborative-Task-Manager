@@ -31,22 +31,16 @@ export default function Register() {
   });
 
   const onSubmit = async (data: RegisterInput) => {
-    console.log('onSubmit called with:', data); // Debug log
     setIsLoading(true);
     
     try {
-      console.log('Attempting registration...'); // Debug log
       await registerUser(data.name, data.email, data.password);
-      console.log('Registration successful'); // Debug log
       toast.success('✓ Account created successfully! Welcome to TaskFlow.', {
         duration: 3000,
       });
       navigate('/dashboard');
     } catch (error: any) {
-      console.log('Registration error:', error); // Debug log
-      
       const errorMessage = error.response?.data?.error || 'Unable to create account. Please try again.';
-      console.log('Error message:', errorMessage); // Debug log
       
       // Show beautiful error toast with 5 second duration
       toast.error(errorMessage, {
@@ -62,15 +56,13 @@ export default function Register() {
           boxShadow: '0 8px 32px rgba(239, 68, 68, 0.15)',
         },
       });
-      console.log('NOT calling setValue - form should keep values automatically');
     } finally {
       setIsLoading(false);
-      console.log('Finally block executed'); // Debug log
     }
   };
 
   const onError = (errors: any) => {
-    console.log('Form validation errors:', errors); // Debug log
+    // Form validation errors handled by react-hook-form
   };
 
   const features = [
@@ -145,7 +137,6 @@ export default function Register() {
               onSubmit={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Form onSubmit triggered');
                 handleSubmit(onSubmit, onError)(e);
               }} 
               className="space-y-5" 

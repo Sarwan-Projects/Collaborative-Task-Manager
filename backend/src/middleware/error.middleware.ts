@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import logger from '../utils/logger';
 
 /**
  * Custom error class for API errors
@@ -24,7 +25,7 @@ export const errorHandler = (
   _next: NextFunction
 ): void => {
   // Log error for debugging (but don't expose to client)
-  console.error('Error:', err.name, err.message);
+  logger.error('Error:', { name: err.name, message: err.message, stack: err.stack });
 
   if (err instanceof ApiError) {
     res.status(err.statusCode).json({

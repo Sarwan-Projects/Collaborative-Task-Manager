@@ -51,6 +51,8 @@ A production-ready, full-stack task management application with real-time collab
 - **Smart Error Handling** - Axios interceptor prevents redirect loops on auth pages
 - **Database Cleanup** - Auto-delete completed tasks, notifications, invitations, and audit logs
 - **Form Persistence** - React Hook Form with shouldUnregister: false prevents data loss
+- **Professional Logging** - Winston logger with structured logs, file rotation, and environment-based levels
+- **No Console Logs** - All console statements replaced with Winston for security and production readiness
 
 ### User Experience
 - **Professional UI/UX** - Expert-level design with smooth animations and transitions
@@ -73,7 +75,7 @@ A production-ready, full-stack task management application with real-time collab
 ## 🛠 Tech Stack
 
 **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, React Query, Socket.io Client  
-**Backend**: Node.js, Express, TypeScript, MongoDB, Mongoose, Socket.io, JWT  
+**Backend**: Node.js, Express, TypeScript, MongoDB, Mongoose, Socket.io, JWT, Winston Logger  
 **DevOps**: Docker, Vercel (Frontend), Render (Backend), MongoDB Atlas
 
 ---
@@ -93,6 +95,7 @@ backend/src/
 ├── repositories/     # Data access
 ├── models/           # Mongoose schemas
 ├── middleware/       # Auth, validation, rate limiting
+├── utils/            # Logger and utilities
 └── socket/           # Real-time events
 
 frontend/src/
@@ -208,6 +211,9 @@ Backend uses strict validation for task creation but lenient validation for upda
 - **Permission Checks** - Backend validates user roles
 - **Auto-Logout** - Validates user existence on mount
 - **CORS Protection** - Restricts cross-origin requests
+- **Professional Logging** - Winston logger with structured logs, file rotation (5MB max, 5 files)
+- **No Console Logs** - All console statements removed for production security
+- **Error Stack Traces** - Logged securely without exposing to clients
 
 ---
 
