@@ -47,28 +47,20 @@ export default function Login() {
       const errorMessage = error.response?.data?.error || 'Unable to sign in. Please check your credentials.';
       console.log('Error message:', errorMessage); // Debug log
       
-      // Show beautiful error toast with auto-dismiss
-      const toastId = toast.error(errorMessage, {
-        duration: 8000, // 8 seconds - enough time to read
+      // Show beautiful error toast with 5 second duration
+      toast.error(errorMessage, {
+        duration: 5000,
         style: {
           background: 'linear-gradient(135deg, #FEE2E2 0%, #FEF2F2 100%)',
           color: '#991B1B',
           border: '2px solid #FCA5A5',
-          borderRadius: '16px',
+          borderRadius: '12px',
           fontWeight: '600',
-          fontSize: '15px',
-          padding: '16px 20px',
-          minWidth: '350px',
-          maxWidth: '450px',
-          boxShadow: '0 10px 40px rgba(239, 68, 68, 0.2), 0 0 0 1px rgba(239, 68, 68, 0.05)',
-        },
-        iconTheme: {
-          primary: '#DC2626',
-          secondary: '#FEE2E2',
+          fontSize: '14px',
+          padding: '14px 18px',
+          boxShadow: '0 8px 32px rgba(239, 68, 68, 0.15)',
         },
       });
-      
-      console.log('Toast ID:', toastId); // Debug log
       console.log('NOT calling setValue - form should keep values automatically');
     } finally {
       setIsLoading(false);

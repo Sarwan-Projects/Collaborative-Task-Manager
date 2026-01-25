@@ -27,27 +27,17 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             position="top-center"
             toastOptions={{
               duration: 4000,
-              style: {
-                borderRadius: '16px',
-                fontWeight: '600',
-              },
               error: {
-                duration: 8000,
+                duration: 5000,
                 style: {
                   background: 'linear-gradient(135deg, #FEE2E2 0%, #FEF2F2 100%)',
                   color: '#991B1B',
                   border: '2px solid #FCA5A5',
-                  borderRadius: '16px',
+                  borderRadius: '12px',
                   fontWeight: '600',
-                  fontSize: '15px',
-                  padding: '16px 20px',
-                  minWidth: '350px',
-                  maxWidth: '450px',
-                  boxShadow: '0 10px 40px rgba(239, 68, 68, 0.2), 0 0 0 1px rgba(239, 68, 68, 0.05)',
-                },
-                iconTheme: {
-                  primary: '#DC2626',
-                  secondary: '#FEE2E2',
+                  fontSize: '14px',
+                  padding: '14px 18px',
+                  boxShadow: '0 8px 32px rgba(239, 68, 68, 0.15)',
                 },
               },
               success: {
@@ -56,15 +46,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                   background: 'linear-gradient(135deg, #D1FAE5 0%, #ECFDF5 100%)',
                   color: '#065F46',
                   border: '2px solid #6EE7B7',
-                  borderRadius: '16px',
+                  borderRadius: '12px',
                   fontWeight: '600',
-                  fontSize: '15px',
-                  padding: '16px 20px',
-                  boxShadow: '0 10px 40px rgba(16, 185, 129, 0.2), 0 0 0 1px rgba(16, 185, 129, 0.05)',
-                },
-                iconTheme: {
-                  primary: '#059669',
-                  secondary: '#D1FAE5',
+                  fontSize: '14px',
+                  padding: '14px 18px',
+                  boxShadow: '0 8px 32px rgba(16, 185, 129, 0.15)',
                 },
               },
             }}
