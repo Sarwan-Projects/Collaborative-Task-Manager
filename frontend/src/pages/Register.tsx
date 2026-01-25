@@ -61,8 +61,8 @@ export default function Register() {
     }
   };
 
-  const onError = (errors: any) => {
-    // Form validation errors handled by react-hook-form
+  const onError = () => {
+    // Form validation errors are displayed inline via error props
   };
 
   const features = [
