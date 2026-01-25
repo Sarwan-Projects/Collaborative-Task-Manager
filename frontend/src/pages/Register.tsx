@@ -24,7 +24,9 @@ export default function Register() {
       name: '',
       email: '',
       password: ''
-    }
+    },
+    shouldUnregister: false, // Keep form values on error
+    mode: 'onSubmit',
   });
 
   const onSubmit = async (data: RegisterInput) => {
@@ -38,17 +40,20 @@ export default function Register() {
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Unable to create account. Please try again.';
       toast.error(errorMessage, {
-        duration: 6000, // Show error for 6 seconds
+        duration: 10000, // Show error for 10 seconds
         style: {
           background: '#FEE2E2',
           color: '#991B1B',
-          border: '2px solid #FCA5A5',
-          fontWeight: '600',
-          fontSize: '14px',
-          padding: '16px',
+          border: '3px solid #DC2626',
+          fontWeight: '700',
+          fontSize: '15px',
+          padding: '20px',
+          minWidth: '350px',
+          boxShadow: '0 10px 40px rgba(220, 38, 38, 0.3)',
         },
+        icon: '❌',
       });
-      // Don't reset form - keep the values so user can see what they entered
+      // Form values will persist automatically with shouldUnregister: false
     } finally {
       setIsLoading(false);
     }

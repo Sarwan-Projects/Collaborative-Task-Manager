@@ -26,19 +26,20 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <SocketProvider>
             <App />
             <Toaster 
-              position="top-right"
+              position="top-center"
               toastOptions={{
                 duration: 4000,
                 error: {
-                  duration: 6000, // Errors show for 6 seconds
+                  duration: 10000, // Errors show for 10 seconds
                   style: {
                     background: '#FEE2E2',
                     color: '#991B1B',
-                    border: '2px solid #FCA5A5',
-                    fontWeight: '600',
-                    fontSize: '14px',
-                    padding: '16px',
-                    minWidth: '300px',
+                    border: '3px solid #DC2626',
+                    fontWeight: '700',
+                    fontSize: '15px',
+                    padding: '20px',
+                    minWidth: '350px',
+                    boxShadow: '0 10px 40px rgba(220, 38, 38, 0.3)',
                   },
                   iconTheme: {
                     primary: '#DC2626',
@@ -50,7 +51,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                   style: {
                     background: '#D1FAE5',
                     color: '#065F46',
-                    border: '2px solid #6EE7B7',
+                    border: '2px solid #059669',
                     fontWeight: '600',
                     fontSize: '14px',
                     padding: '16px',
