@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, forwardRef, useState } from 'react';
+import { InputHTMLAttributes, forwardRef, useState, useId } from 'react';
 import { Eye, EyeOff, Lock } from 'lucide-react';
 
 interface PasswordInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
@@ -7,13 +7,15 @@ interface PasswordInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>,
 }
 
 const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
-  ({ className = '', label, error, ...props }, ref) => {
+  ({ className = '', label, error, id: providedId, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
+    const generatedId = useId();
+    const inputId = providedId || generatedId;
 
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+          <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1.5">
             {label}
           </label>
         )}
@@ -22,6 +24,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             <Lock className="w-5 h-5" />
           </div>
           <input
+            id={inputId}
             ref={ref}
             type={showPassword ? 'text' : 'password'}
             className={`w-full px-4 py-2.5 pl-10 pr-12 border rounded-xl shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 ${
