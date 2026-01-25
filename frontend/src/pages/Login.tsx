@@ -18,6 +18,8 @@ export default function Login() {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors }
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -29,25 +31,33 @@ export default function Login() {
     mode: 'onSubmit',
   });
 
+  // Watch form values to preserve them
+  const emailValue = watch('email');
+  const passwordValue = watch('password');
+
   const onSubmit = async (data: LoginInput, e?: React.BaseSyntheticEvent) => {
-    e?.preventDefault(); // Explicitly prevent default form submission
+    e?.preventDefault();
+    e?.stopPropagation();
+    
     setIsLoading(true);
     
-    // Store values before potential error
-    const email = data.email;
-    const password = data.password;
-    
     try {
-      await login(email, password);
+      await login(data.email, data.password);
       toast.success('✓ Welcome back! Redirecting to your dashboard...', {
         duration: 3000,
       });
       navigate('/dashboard');
     } catch (error: any) {
+      // Preserve form values after error
+      setTimeout(() => {
+        setValue('email', emailValue, { shouldValidate: false });
+        setValue('password', passwordValue, { shouldValidate: false });
+      }, 0);
+      
       const errorMessage = error.response?.data?.error || 'Unable to sign in. Please check your credentials.';
       
-      // Show error toast that stays until dismissed
-      toast.error(errorMessage, {
+      // Show persistent error toast
+      const toastId = toast.error(errorMessage, {
         duration: Infinity,
         style: {
           background: '#FEE2E2',
@@ -63,7 +73,8 @@ export default function Login() {
         icon: '❌',
       });
       
-      // Don't reset form on error - keep values
+      console.log('Toast ID:', toastId); // Debug log
+      
       return false;
     } finally {
       setIsLoading(false);

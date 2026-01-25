@@ -18,6 +18,8 @@ export default function Register() {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors }
   } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
@@ -30,26 +32,35 @@ export default function Register() {
     mode: 'onSubmit',
   });
 
+  // Watch form values to preserve them
+  const nameValue = watch('name');
+  const emailValue = watch('email');
+  const passwordValue = watch('password');
+
   const onSubmit = async (data: RegisterInput, e?: React.BaseSyntheticEvent) => {
-    e?.preventDefault(); // Explicitly prevent default form submission
+    e?.preventDefault();
+    e?.stopPropagation();
+    
     setIsLoading(true);
     
-    // Store values before potential error
-    const name = data.name;
-    const email = data.email;
-    const password = data.password;
-    
     try {
-      await registerUser(name, email, password);
+      await registerUser(data.name, data.email, data.password);
       toast.success('✓ Account created successfully! Welcome to TaskFlow.', {
         duration: 3000,
       });
       navigate('/dashboard');
     } catch (error: any) {
+      // Preserve form values after error
+      setTimeout(() => {
+        setValue('name', nameValue, { shouldValidate: false });
+        setValue('email', emailValue, { shouldValidate: false });
+        setValue('password', passwordValue, { shouldValidate: false });
+      }, 0);
+      
       const errorMessage = error.response?.data?.error || 'Unable to create account. Please try again.';
       
-      // Show error toast that stays until dismissed
-      toast.error(errorMessage, {
+      // Show persistent error toast
+      const toastId = toast.error(errorMessage, {
         duration: Infinity,
         style: {
           background: '#FEE2E2',
@@ -65,7 +76,8 @@ export default function Register() {
         icon: '❌',
       });
       
-      // Don't reset form on error - keep values
+      console.log('Toast ID:', toastId); // Debug log
+      
       return false;
     } finally {
       setIsLoading(false);
