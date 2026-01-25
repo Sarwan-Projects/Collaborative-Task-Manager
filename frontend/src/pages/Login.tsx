@@ -144,33 +144,6 @@ export default function Login() {
                 {isLoading ? 'Signing In...' : 'Sign In'}
                 {!isLoading && <ArrowRight className="w-4 h-4 ml-2" />}
               </Button>
-
-              {/* Debug button to test toast */}
-              <button
-                type="button"
-                onClick={() => {
-                  console.log('Test button clicked');
-                  const testToastId = toast.error('Test error message - this should stay forever!', {
-                    duration: Infinity,
-                    style: {
-                      background: '#FEE2E2',
-                      color: '#991B1B',
-                      border: '3px solid #DC2626',
-                      fontWeight: '700',
-                      fontSize: '16px',
-                      padding: '20px 24px',
-                      minWidth: '400px',
-                      maxWidth: '500px',
-                      boxShadow: '0 20px 50px rgba(220, 38, 38, 0.4)',
-                    },
-                    icon: '❌',
-                  });
-                  console.log('Test Toast ID:', testToastId);
-                }}
-                className="w-full px-4 py-2 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-xl hover:bg-gray-50"
-              >
-                🧪 Test Toast (Debug)
-              </button>
             </form>
 
             <div className="mt-6 text-center">

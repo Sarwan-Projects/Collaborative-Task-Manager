@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Layout from './components/layout/Layout';
 import Login from './pages/Login';
@@ -23,6 +23,7 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -32,7 +33,12 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return user ? <Navigate to="/dashboard" /> : <>{children}</>;
+  // If user is logged in and not on login/register page, redirect to dashboard
+  if (user && location.pathname !== '/login' && location.pathname !== '/register') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return user ? <Navigate to="/dashboard" replace /> : <>{children}</>;
 }
 
 export default function App() {
