@@ -30,16 +30,17 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               toastOptions={{
                 duration: 4000,
                 error: {
-                  duration: 10000, // Errors show for 10 seconds
+                  duration: Infinity, // Errors stay until manually dismissed
                   style: {
                     background: '#FEE2E2',
                     color: '#991B1B',
                     border: '3px solid #DC2626',
                     fontWeight: '700',
-                    fontSize: '15px',
-                    padding: '20px',
-                    minWidth: '350px',
-                    boxShadow: '0 10px 40px rgba(220, 38, 38, 0.3)',
+                    fontSize: '16px',
+                    padding: '20px 24px',
+                    minWidth: '400px',
+                    maxWidth: '500px',
+                    boxShadow: '0 20px 50px rgba(220, 38, 38, 0.4)',
                   },
                   iconTheme: {
                     primary: '#DC2626',

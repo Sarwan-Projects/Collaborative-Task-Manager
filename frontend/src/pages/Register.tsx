@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Zap, Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { Zap, Mail, User, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { registerSchema, RegisterInput } from '../lib/validations';
 import Input from '../components/ui/Input';
+import PasswordInput from '../components/ui/PasswordInput';
 import Button from '../components/ui/Button';
 
 export default function Register() {
@@ -25,35 +26,43 @@ export default function Register() {
       email: '',
       password: ''
     },
-    shouldUnregister: false, // Keep form values on error
+    shouldUnregister: false,
     mode: 'onSubmit',
   });
 
   const onSubmit = async (data: RegisterInput) => {
     setIsLoading(true);
+    
+    // Store values before potential error
+    const name = data.name;
+    const email = data.email;
+    const password = data.password;
+    
     try {
-      await registerUser(data.name, data.email, data.password);
+      await registerUser(name, email, password);
       toast.success('✓ Account created successfully! Welcome to TaskFlow.', {
         duration: 3000,
       });
       navigate('/dashboard');
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Unable to create account. Please try again.';
+      
+      // Show error toast with very long duration
       toast.error(errorMessage, {
-        duration: 10000, // Show error for 10 seconds
+        duration: Infinity, // Toast stays until manually dismissed
         style: {
           background: '#FEE2E2',
           color: '#991B1B',
           border: '3px solid #DC2626',
           fontWeight: '700',
-          fontSize: '15px',
-          padding: '20px',
-          minWidth: '350px',
-          boxShadow: '0 10px 40px rgba(220, 38, 38, 0.3)',
+          fontSize: '16px',
+          padding: '20px 24px',
+          minWidth: '400px',
+          maxWidth: '500px',
+          boxShadow: '0 20px 50px rgba(220, 38, 38, 0.4)',
         },
         icon: '❌',
       });
-      // Form values will persist automatically with shouldUnregister: false
     } finally {
       setIsLoading(false);
     }
@@ -147,13 +156,11 @@ export default function Register() {
                 {...register('email')}
               />
 
-              <Input
-                type="password"
+              <PasswordInput
                 label="Password"
                 placeholder="Create a strong password"
                 autoComplete="new-password"
                 error={errors.password?.message}
-                icon={<Lock className="w-5 h-5" />}
                 {...register('password')}
               />
 

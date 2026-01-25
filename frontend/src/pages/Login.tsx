@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Zap, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Zap, Mail, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { loginSchema, LoginInput } from '../lib/validations';
 import Input from '../components/ui/Input';
+import PasswordInput from '../components/ui/PasswordInput';
 import Button from '../components/ui/Button';
 
 export default function Login() {
@@ -24,35 +25,42 @@ export default function Login() {
       email: '',
       password: ''
     },
-    shouldUnregister: false, // Keep form values on error
+    shouldUnregister: false,
     mode: 'onSubmit',
   });
 
   const onSubmit = async (data: LoginInput) => {
     setIsLoading(true);
+    
+    // Store values before potential error
+    const email = data.email;
+    const password = data.password;
+    
     try {
-      await login(data.email, data.password);
+      await login(email, password);
       toast.success('✓ Welcome back! Redirecting to your dashboard...', {
         duration: 3000,
       });
       navigate('/dashboard');
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Unable to sign in. Please check your credentials.';
+      
+      // Show error toast with very long duration
       toast.error(errorMessage, {
-        duration: 10000, // Show error for 10 seconds
+        duration: Infinity, // Toast stays until manually dismissed
         style: {
           background: '#FEE2E2',
           color: '#991B1B',
           border: '3px solid #DC2626',
           fontWeight: '700',
-          fontSize: '15px',
-          padding: '20px',
-          minWidth: '350px',
-          boxShadow: '0 10px 40px rgba(220, 38, 38, 0.3)',
+          fontSize: '16px',
+          padding: '20px 24px',
+          minWidth: '400px',
+          maxWidth: '500px',
+          boxShadow: '0 20px 50px rgba(220, 38, 38, 0.4)',
         },
         icon: '❌',
       });
-      // Form values will persist automatically with shouldUnregister: false
     } finally {
       setIsLoading(false);
     }
@@ -85,13 +93,11 @@ export default function Login() {
                 {...register('email')}
               />
 
-              <Input
-                type="password"
+              <PasswordInput
                 label="Password"
                 placeholder="Enter your password"
                 autoComplete="current-password"
                 error={errors.password?.message}
-                icon={<Lock className="w-5 h-5" />}
                 {...register('password')}
               />
 
