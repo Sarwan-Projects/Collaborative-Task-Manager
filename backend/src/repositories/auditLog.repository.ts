@@ -26,6 +26,14 @@ export class AuditLogRepository {
       .populate('userId', 'name email')
       .sort({ createdAt: -1 });
   }
+
+  /**
+   * Delete all audit logs for a specific task
+   * Used for cleanup when task is deleted or completed
+   */
+  async deleteByTask(taskId: string): Promise<void> {
+    await AuditLog.deleteMany({ taskId });
+  }
 }
 
 export const auditLogRepository = new AuditLogRepository();

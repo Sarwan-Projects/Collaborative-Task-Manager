@@ -25,7 +25,28 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <AuthProvider>
           <SocketProvider>
             <App />
-            <Toaster position="top-right" />
+            <Toaster 
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                error: {
+                  duration: 5000,
+                  style: {
+                    background: '#FEE2E2',
+                    color: '#991B1B',
+                    border: '1px solid #FCA5A5',
+                  },
+                },
+                success: {
+                  duration: 3000,
+                  style: {
+                    background: '#D1FAE5',
+                    color: '#065F46',
+                    border: '1px solid #6EE7B7',
+                  },
+                },
+              }}
+            />
           </SocketProvider>
         </AuthProvider>
       </BrowserRouter>

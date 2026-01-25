@@ -176,6 +176,7 @@ export class TaskService {
         await taskRepository.delete(taskId);
         await notificationRepository.deleteByTask(taskId);
         await taskInvitationRepository.deleteByTask(taskId);
+        await auditLogRepository.deleteByTask(taskId);
         
         // Return the task with completed status and isDeleted flag
         const completedTask = {
@@ -332,18 +333,11 @@ export class TaskService {
       throw new ApiError('Only the task creator can delete this task', 403);
     }
 
+    // Delete task and all associated data (cleanup)
     await taskRepository.delete(taskId);
-
-    // Delete associated notifications and invitations
     await notificationRepository.deleteByTask(taskId);
     await taskInvitationRepository.deleteByTask(taskId);
-
-    await auditLogRepository.create({
-      taskId,
-      userId,
-      action: 'DELETED',
-      previousValue: task.title
-    });
+    await auditLogRepository.deleteByTask(taskId);
   }
 
   /**
